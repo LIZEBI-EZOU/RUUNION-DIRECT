@@ -39,6 +39,8 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 <h1>RÉUNION DIRECT</h1>
 <p class="sub">Une même réunion depuis le navigateur ou l'application Android.</p>
 
+<div class="card"><h2>Compte</h2><div id="accountStatus" class="notice warn">Non connecté</div><button onclick="openAccount()">🔐 Option connexion</button></div>
+
 <div class="card">
 <h2>Identité de réunion</h2>
 <div class="row">
@@ -77,7 +79,9 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 <div class="card"><h2>Réunions récentes</h2><div id="history"></div><button class="muted" onclick="clearHistory()">Effacer l'historique</button></div>
 <div class="card"><h2>Tableau de bord</h2><p class="small">Suivez les réunions ouvertes depuis cet appareil : participants, durée et qualité réseau.</p><button class="muted" onclick="showDashboard()">Ouvrir le tableau de bord</button></div>
 
-<div class="card">
+<div class="card"><h2>Options</h2><button class="muted" onclick="openOptions()">⚙️ Ouvrir les options</button></div>
+
+<div class="card" style="display:none">
 <h2>Options</h2>
 <label><input id="mute" type="checkbox" checked> Arriver micro et caméra coupés</label><br>
 <label><input id="noise" type="checkbox" checked> Suppression du bruit</label>
@@ -115,6 +119,8 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 <button onclick="showMeetingTools()" style="position:absolute;z-index:11;right:14px;top:196px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Outils</button>
 <button id="people" onclick="toggleParticipants()" style="position:absolute;z-index:11;right:14px;top:100px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Participants</button>
 </div>
+<div id="accountBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:60;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(460px,100%);background:#fff;border-radius:18px;padding:20px"><h2>Connexion au compte</h2><p class="small">Connectez votre compte avant de démarrer une réunion.</p><input id="accountEmail" type="email" value="ezouservices@gmail.com" autocomplete="email"><div id="accountMessage" class="notice">Compte autorisé : ezouservices@gmail.com</div><div class="row"><button class="muted" onclick="closeAccount()">Annuler</button><button onclick="loginAccount()">Se connecter</button></div><button class="muted" onclick="logoutAccount()" style="margin-top:10px">Déconnecter</button></div></div>
+<div id="optionsBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:59;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(520px,100%);background:#fff;border-radius:18px;padding:20px"><h2>Options facultatives</h2><label><input id="mute" type="checkbox" checked> Arriver micro et caméra coupés</label><br><label><input id="noise" type="checkbox" checked> Suppression du bruit</label><p class="small">Les options vidéo, audio et appareil sont facultatives et peuvent être modifiées avant la réunion.</p><button class="muted" onclick="closeOptions()">Fermer</button></div></div>
 <div id="preflight"><div class="box">
 <h2>Préparer votre réunion</h2><p class="small">Vérifiez votre caméra et votre microphone avant d’entrer.</p>
 <video id="preview" autoplay muted playsinline></video>
@@ -136,8 +142,8 @@ const key="ruunion-meetings-v4",histKey="ruunion-history-v4",profileKey="ruunion
 const words=["lac","pin","baie","val","mont","iris","cap","dune","anse","col"];
 
 const android=typeof AndroidBridge!=="undefined";
-function openBrowser(){if(android&&window.AndroidBridge.openMeetingInBrowser){AndroidBridge.openMeetingInBrowser(window.location.href);return;}document.querySelector("#browserNotice").textContent="Vous êtes déjà dans le navigateur. Partagez cette page ou rejoignez avec un code.";}
-function openAppHint(){document.querySelector("#browserNotice").textContent=android?"Vous utilisez déjà l’application Android.":"Continuez dans le navigateur ou installez l’application Android si elle est disponible.";}
+function openBrowser(){const u=(currentUrl||PUBLIC_WEB_URL);if(android&&window.AndroidBridge.openMeetingInBrowser){AndroidBridge.openMeetingInBrowser(u);return;}window.open(u,"_blank");document.querySelector("#browserNotice").textContent="Vous êtes déjà dans le navigateur. Partagez cette page ou rejoignez avec un code.";}
+function openAppHint(){document.querySelector("#browserNotice").textContent=android?"Vous utilisez déjà l’application Android.":"Continuez dans le navigateur ou installez l’application Android si elle est disponible.";}\nfunction getAccount(){try{return JSON.parse(localStorage.getItem(accountKey)||"null")}catch(e){return null}}\nfunction updateAccount(){const a=getAccount();const el=document.querySelector("#accountStatus");if(a){el.className="notice success";el.textContent="Connecté : "+a.email}else{el.className="notice warn";el.textContent="Connexion requise avant de démarrer une réunion."}}\nfunction openAccount(){document.querySelector("#accountBox").style.display="flex";document.querySelector("#accountEmail").value=(getAccount()?.email)||"ezouservices@gmail.com"}\nfunction closeAccount(){document.querySelector("#accountBox").style.display="none"}\nfunction loginAccount(){const e=document.querySelector("#accountEmail").value.trim().toLowerCase();if(e!=="ezouservices@gmail.com"){document.querySelector("#accountMessage").className="notice warn";document.querySelector("#accountMessage").textContent="Utilisez le compte ezouservices@gmail.com pour cette version.";return}localStorage.setItem(accountKey,JSON.stringify({email:e,connectedAt:Date.now()}));updateAccount();closeAccount()}\nfunction logoutAccount(){localStorage.removeItem(accountKey);updateAccount()}\nfunction openOptions(){document.querySelector("#optionsBox").style.display="flex"}\nfunction closeOptions(){document.querySelector("#optionsBox").style.display="none"}
 function code(){return words[Math.floor(Math.random()*words.length)]+"-"+Math.random().toString(36).slice(2,6)}
 function get(k){try{return JSON.parse(localStorage.getItem(k)||"[]")}catch(e){return[]}}
 function put(k,v){localStorage.setItem(k,JSON.stringify(v))}
@@ -270,7 +276,7 @@ function renderHistory(){
 function joinCode(c){document.querySelector("#joinCode").value=c;join()}
 function clearHistory(){put(histKey,[]);renderHistory()}
 function esc(s){return String(s).replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[x]))}
-if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});loadProfile();checkServer();if(!android&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission().catch(()=>{});get(key).filter(m=>new Date(m.date)>new Date()).forEach(scheduleNative);render();renderHistory();
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});loadProfile();updateAccount();checkServer();if(!android&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission().catch(()=>{});get(key).filter(m=>new Date(m.date)>new Date()).forEach(scheduleNative);render();renderHistory();
 </script>
 </body>
 </html>
