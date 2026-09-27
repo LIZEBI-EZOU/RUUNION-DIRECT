@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.*;
 import android.provider.Settings;
 import android.webkit.*;
+import java.io.*;
 import java.util.*;
 
 public class MainActivity extends Activity {
@@ -23,6 +24,17 @@ public class MainActivity extends Activity {
   if(Build.VERSION.SDK_INT>=26)s.setSafeBrowsingEnabled(true);
   if(Build.VERSION.SDK_INT>=21)s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
   webView.setWebViewClient(new WebViewClient(){
+   @Override public WebResourceResponse shouldInterceptRequest(WebView v,WebResourceRequest r){
+    Uri u=r.getUrl();
+    if("https".equalsIgnoreCase(u.getScheme())&&"ruunion.local".equalsIgnoreCase(u.getHost())){
+     String path=u.getPath();
+     if("/ruunion-logo.png".equals(path)){
+      try{return new WebResourceResponse("image/png","UTF-8",getAssets().open("ruunion-logo.png"));}catch(Exception ignored){}
+     }
+    }
+    return super.shouldInterceptRequest(v,r);
+   }
+
    @Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){
     Uri u=r.getUrl();String scheme=u.getScheme();
     if("file".equals(scheme)||"https".equals(scheme))return false;
@@ -49,7 +61,11 @@ public class MainActivity extends Activity {
   webView.addJavascriptInterface(new AndroidBridge(this),"AndroidBridge");
   setContentView(webView);
   requestMediaPermissions();
-  webView.loadUrl("file:///android_asset/index.html");
+  try{
+   InputStream in=getAssets().open("index.html");ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] buf=new byte[8192];int n;
+   while((n=in.read(buf))!=-1)out.write(buf,0,n);in.close();
+   webView.loadDataWithBaseURL("https://ruunion.local/",""+new String(out.toByteArray(),"UTF-8"),"text/html","UTF-8","https://ruunion.local/");
+  }catch(Exception e){webView.loadDataWithBaseURL("https://ruunion.local/","<h2>RUUNION DIRECT</h2><p>Impossible de charger l'application.</p>","text/html","UTF-8",null);}
  }
 
  private void requestMediaPermissions(){
