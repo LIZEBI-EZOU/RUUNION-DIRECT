@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RUUNION DIRECT</title>
+<title>RÉUNION DIRECT</title>
 <script src="https://unpkg.com/@daily-co/daily-js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -35,8 +35,8 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 </head>
 <body>
 <main>
-<div class="brand"><img class="logo" src="ruunion-logo.png" alt="RUUNION DIRECT"><div class="brand-title"><strong>RUUNION DIRECT</strong><span>Réunions vidéo simples et directes</span></div></div>
-<h1>Réunions vidéo directes</h1>
+<div class="brand"><img class="logo" src="ruunion-logo.png" alt="RÉUNION DIRECT"><div class="brand-title"><strong>RÉUNION DIRECT</strong><span>Réunions vidéo simples et directes</span></div></div>
+<h1>RÉUNION DIRECT</h1>
 <p class="sub">Une même réunion depuis le navigateur ou l'application Android.</p>
 
 <div class="card">
@@ -50,7 +50,7 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 
 <div class="card">
 <h2>Réunion instantanée</h2>
-<div><label for="title">Nom de la réunion</label><input id="title" placeholder="Ma réunion"></div>
+<div><label for="title">Nom de la réunion</label><input id="title" placeholder="RÉUNION DIRECT"></div>
 <div class="row">
 <button onclick="instant(true)">Démarrer la réunion (modérateur)</button>
 <button class="muted" onclick="instant(false)">Démarrer comme participant</button>
@@ -147,19 +147,19 @@ async function createMeeting(asModerator,forcedCode){
  if(busy)return;
  const p=identity();if(!p)return;
  busy=true;
- const title=document.querySelector("#title").value.trim()||"Réunion instantanée";
+ const title=document.querySelector("#title").value.trim()||"RÉUNION DIRECT";
  const c=forcedCode||code();
  const notice=document.querySelector("#startNotice");notice.className="notice";notice.textContent="Création de la réunion…";
  try{
   const res=await fetch(API_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:c,title,name:p.name,email:p.email,moderator:!!asModerator})});
   const data=await res.json().catch(()=>({}));
-  if(!res.ok||!data.url)throw new Error(data.message||"Le serveur de réunion n'est pas disponible.");
+  if(!res.ok||!data.url)throw new Error(data.message||"Le service de réunion est indisponible.");
   notice.className="notice success";notice.textContent="Réunion prête. Connexion directe…";
   await prepareAndOpen(data,c,title,asModerator);
   addHistory(title,c);
  }catch(e){
-  notice.className="notice warn";notice.textContent="Impossible de démarrer la réunion pour le moment. Vérifiez la connexion au service Daily.";
-  alert("RUUNION DIRECT : "+(e.message||"Une erreur est survenue."));
+  notice.className="notice warn";notice.textContent="Impossible de démarrer RÉUNION DIRECT. Le service de réunion n’a pas pu préparer la salle. Vérifiez Internet puis réessayez.";
+  showError("Impossible de démarrer RÉUNION DIRECT : "+(e.message||"le service de réunion est momentanément indisponible.")+"");
  } finally { busy=false; }
 }
 function instant(asModerator){createMeeting(asModerator)}
@@ -168,10 +168,10 @@ async function join(){
  const p=identity();if(!p)return;
  const notice=document.querySelector("#startNotice");notice.className="notice";notice.textContent="Connexion à la réunion…";
  try{
-  const res=await fetch(API_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:c,name:p.name,email:p.email,moderator:false,title:"RUUNION DIRECT"})});
+  const res=await fetch(API_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:c,name:p.name,email:p.email,moderator:false,title:"RÉUNION DIRECT"})});
   const data=await res.json().catch(()=>({}));if(!res.ok||!data.url)throw new Error(data.message||"Réunion introuvable.");
-  await prepareAndOpen(data,c,data.title||"RUUNION DIRECT",false);addHistory(data.title||"RUUNION DIRECT",c);
- }catch(e){notice.className="notice warn";notice.textContent="Réunion introuvable ou service indisponible.";alert("RUUNION DIRECT : "+e.message)}
+  await prepareAndOpen(data,c,data.title||"RÉUNION DIRECT",false);addHistory(data.title||"RÉUNION DIRECT",c);
+ }catch(e){notice.className="notice warn";notice.textContent="Réunion introuvable ou service indisponible.";alert("RÉUNION DIRECT : "+e.message)}
 }
 async function prepareAndOpen(data,c,title,moderator){
  currentJoinData={data,c,title,moderator};resetMeetingMetrics();
@@ -187,7 +187,7 @@ function resetMeetingMetrics(){meetingStartedAt=Date.now();participantSessions={
 function saveMeetingMetrics(){if(!meetingStartedAt)return;const duration=Math.max(0,Math.round((Date.now()-meetingStartedAt)/1000));const a=get(histKey);const idx=a.findIndex(x=>x.code===currentCode);if(idx>=0){a[idx].duration=(a[idx].duration||0)+duration;a[idx].lastQuality=lastNetworkQuality;a[idx].participants=Object.keys(participantSessions).length;a[idx].reconnects=(a[idx].reconnects||0)+reconnectAttempts;put(histKey,a);}}
 function showMeetingTools(){document.querySelector("#toolsBox").style.display="flex";updateTechStats()}
 function closeMeetingTools(){document.querySelector("#toolsBox").style.display="none"}
-function showDashboard(){const a=get(histKey);const total=a.length;const durations=a.reduce((n,x)=>n+(x.duration||0),0);const participants=a.reduce((n,x)=>n+(x.participants||0),0);document.querySelector("#dashboardContent").innerHTML="<div class='notice success'><b>"+total+"</b> réunion(s) enregistrée(s)</div><div class='notice'>Durée cumulée : <b>"+Math.round(durations/60)+" min</b><br>Participations observées : <b>"+participants+"</b><br>Dernières réunions :</div>"+(a.length?a.slice(0,20).map(x=>"<div class='meet'><div><b>"+esc(x.title||"RUUNION DIRECT")+"</b><div class='small'>"+new Date(x.at).toLocaleString("fr-FR")+"</div><div class='code'>"+esc(x.code)+"</div><div class='small'>Durée "+Math.round((x.duration||0)/60)+" min · participants "+(x.participants||0)+" · réseau "+esc(x.lastQuality||"—")+" · reconnexions "+(x.reconnects||0)+"</div></div></div>").join(""):"<p class='small'>Aucune donnée.</p>");document.querySelector("#dashboardBox").style.display="flex"}
+function showDashboard(){const a=get(histKey);const total=a.length;const durations=a.reduce((n,x)=>n+(x.duration||0),0);const participants=a.reduce((n,x)=>n+(x.participants||0),0);document.querySelector("#dashboardContent").innerHTML="<div class='notice success'><b>"+total+"</b> réunion(s) enregistrée(s)</div><div class='notice'>Durée cumulée : <b>"+Math.round(durations/60)+" min</b><br>Participations observées : <b>"+participants+"</b><br>Dernières réunions :</div>"+(a.length?a.slice(0,20).map(x=>"<div class='meet'><div><b>"+esc(x.title||"RÉUNION DIRECT")+"</b><div class='small'>"+new Date(x.at).toLocaleString("fr-FR")+"</div><div class='code'>"+esc(x.code)+"</div><div class='small'>Durée "+Math.round((x.duration||0)/60)+" min · participants "+(x.participants||0)+" · réseau "+esc(x.lastQuality||"—")+" · reconnexions "+(x.reconnects||0)+"</div></div></div>").join(""):"<p class='small'>Aucune donnée.</p>");document.querySelector("#dashboardBox").style.display="flex"}
 function closeDashboard(){document.querySelector("#dashboardBox").style.display="none"}
 function showQr(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);const box=document.querySelector("#qrBox"),q=document.querySelector("#qrCanvas");q.innerHTML="";document.querySelector("#qrCodeText").textContent=currentCode;box.style.display="flex";if(window.QRCode)new QRCode(q,{text:u,width:220,height:220});else q.textContent=u}
 function closeQr(){document.querySelector("#qrBox").style.display="none"}
@@ -235,16 +235,16 @@ window.addEventListener("online",()=>{setNetwork(true);if(callFrame&&currentJoin
 async function checkServer(){try{const r=await fetch(API_ENDPOINT.replace("/meeting","/health"),{cache:"no-store"});if(!r.ok)throw new Error();document.querySelector("#startNotice").className="notice success";document.querySelector("#startNotice").textContent="Service de réunion opérationnel.";return true}catch(e){document.querySelector("#startNotice").className="notice warn";document.querySelector("#startNotice").textContent="Service temporairement indisponible. Réessayez dans quelques instants.";return false}}
 async function closeCall(){saveMeetingMetrics();if(callFrame){try{callFrame.leave()}catch(e){}try{callFrame.destroy()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";document.querySelector("#participantsPanel").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;currentJoinData=null;busy=false}
 async function copyLink(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);try{await navigator.clipboard.writeText(u);alert("Lien copié.");}catch(e){const ta=document.createElement("textarea");ta.value=u;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("Lien copié.")}}
-function showQrLegacy(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);const w=window.open("","_blank");if(w){const html='<title>QR RUUNION DIRECT</title><div style="font-family:Arial;text-align:center;padding:30px"><h2>Scanner pour rejoindre</h2><div id="q"></div><p>'+esc(currentCode)+'</p></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\\/script><script>new QRCode(document.getElementById("q"),'+JSON.stringify(u)+')<\\/script>';w.document.write(html);w.document.close();}}
+function showQrLegacy(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);const w=window.open("","_blank");if(w){const html='<title>QR RÉUNION DIRECT</title><div style="font-family:Arial;text-align:center;padding:30px"><h2>Scanner pour rejoindre</h2><div id="q"></div><p>'+esc(currentCode)+'</p></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\\/script><script>new QRCode(document.getElementById("q"),'+JSON.stringify(u)+')<\\/script>';w.document.write(html);w.document.close();}}
 function share(){
  const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);
- const t="Rejoins-moi sur RUUNION DIRECT : "+u+"\nCode : "+currentCode;
- if(navigator.share)navigator.share({title:"RUUNION DIRECT",text:t,url:u}).catch(()=>{});
+ const t="Rejoins-moi sur RÉUNION DIRECT : "+u+"\nCode : "+currentCode;
+ if(navigator.share)navigator.share({title:"RÉUNION DIRECT",text:t,url:u}).catch(()=>{});
  else if(android)AndroidBridge.openMeetingInBrowser("https://wa.me/?text="+encodeURIComponent(t));
  else window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank","noopener");
 }
 function schedule(){
- const title=document.querySelector("#schedTitle").value.trim()||"Réunion",date=document.querySelector("#schedDate").value;
+ const title=document.querySelector("#schedTitle").value.trim()||"RÉUNION DIRECT",date=document.querySelector("#schedDate").value;
  if(!date)return alert("Choisissez une date");
  const when=new Date(date).getTime();if(!Number.isFinite(when)||when<=Date.now())return alert("Choisissez une date future");
  const m={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),title,date,code:code()};
