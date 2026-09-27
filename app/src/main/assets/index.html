@@ -73,12 +73,26 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 </div>
 
 <div class="card"><h2>Réunions récentes</h2><div id="history"></div><button class="muted" onclick="clearHistory()">Effacer l'historique</button></div>
+<div class="card"><h2>Tableau de bord</h2><p class="small">Suivez les réunions ouvertes depuis cet appareil : participants, durée et qualité réseau.</p><button class="muted" onclick="showDashboard()">Ouvrir le tableau de bord</button></div>
 
 <div class="card">
 <h2>Options</h2>
 <label><input id="mute" type="checkbox" checked> Arriver micro et caméra coupés</label><br>
 <label><input id="noise" type="checkbox" checked> Suppression du bruit</label>
 <p class="small">Les réunions, l'identité et les préférences sont conservées localement sur cet appareil.</p>
+</div>
+
+<div class="card">
+<h2>Fonctions avancées Daily</h2>
+<div class="row">
+<button class="muted" onclick="startRecording()">Enregistrer</button>
+<button class="muted" onclick="stopRecording()">Arrêter l’enregistrement</button>
+</div>
+<div class="row">
+<button class="muted" onclick="toggleScreenShare()">Partager l’écran</button>
+<button class="muted" onclick="toggleTranscription()">Transcription / sous-titres</button>
+</div>
+<p class="small">Ces fonctions restent soumises aux capacités et autorisations du compte Daily.</p>
 </div>
 
 <div class="card">
@@ -96,6 +110,7 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 <button id="share" onclick="share()">Inviter</button>
 <button onclick="copyLink()" style="position:absolute;z-index:11;right:14px;top:14px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Copier le lien</button>
 <button onclick="showQr()" style="position:absolute;z-index:11;right:14px;top:148px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">QR code</button>
+<button onclick="showMeetingTools()" style="position:absolute;z-index:11;right:14px;top:196px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Outils</button>
 <button id="people" onclick="toggleParticipants()" style="position:absolute;z-index:11;right:14px;top:100px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Participants</button>
 </div>
 <div id="preflight"><div class="box">
@@ -106,11 +121,15 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 <div id="preflightMessage" class="notice">Autorisez la caméra et le microphone pour continuer.</div>
 <div class="row"><button class="muted" onclick="cancelPreflight()">Annuler</button><button onclick="confirmPreflight()">Continuer</button></div>
 </div></div>
+<div id="qrBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:50;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(420px,100%);background:#fff;border-radius:18px;padding:20px;text-align:center"><h2>Invitation QR</h2><div id="qrCanvas" style="display:flex;justify-content:center;margin:18px 0"></div><p id="qrCodeText" class="code"></p><button class="muted" onclick="closeQr()">Fermer</button></div></div>
+<div id="toolsBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:49;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(520px,100%);background:#fff;border-radius:18px;padding:20px"><h2>Outils de réunion</h2><div id="techStats" class="notice">Statistiques techniques : collecte en cours…</div><div class="row"><button class="muted" onclick="startRecording()">Démarrer l’enregistrement</button><button class="muted" onclick="toggleScreenShare()">Partager l’écran</button></div><div class="row"><button class="muted" onclick="toggleTranscription()">Transcription / sous-titres</button><button class="muted" onclick="refreshParticipants()">Actualiser les participants</button></div><button class="muted" onclick="closeMeetingTools()">Fermer</button></div></div>
+<div id="dashboardBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:48;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(680px,100%);max-height:85vh;overflow:auto;background:#fff;border-radius:18px;padding:20px"><h2>Tableau de bord</h2><div id="dashboardContent"></div><button class="muted" onclick="closeDashboard()">Fermer</button></div></div>
 <div id="errorBox"><div class="box"><h2>Connexion interrompue</h2><p id="errorText" class="small">La connexion à la réunion a été interrompue.</p><div class="row"><button class="muted" onclick="closeError()">Fermer</button><button onclick="retryCall()">Réessayer</button></div></div></div>
 <script>
 const API_ENDPOINT="https://ruunion-direct-api.onrender.com/meeting";
 const DAILY_DOMAIN="ezouservicesmeeting.daily.co";
 let callFrame=null,currentRoom="",currentUrl="",currentTitle="",currentCode="",currentModerator=false,currentJoinData=null,pendingJoin=null,preflightStream=null,reconnectTimer=null;
+let meetingStartedAt=0,participantSessions={},lastNetworkQuality="unknown",reconnectAttempts=0,recordingActive=false,screenShareActive=false,transcriptionActive=false;
 const key="ruunion-meetings-v4",histKey="ruunion-history-v4",profileKey="ruunion-profile-v1";
 const words=["lac","pin","baie","val","mont","iris","cap","dune","anse","col"];
 
@@ -164,8 +183,21 @@ async function prepareAndOpen(data,c,title,moderator){
 function stopPreflight(){if(preflightStream){preflightStream.getTracks().forEach(t=>t.stop());preflightStream=null}const v=document.querySelector("#preview");if(v)v.srcObject=null}
 function cancelPreflight(){stopPreflight();document.querySelector("#preflight").style.display="none";currentJoinData=null}
 function confirmPreflight(){const j=currentJoinData;if(!j)return;stopPreflight();document.querySelector("#preflight").style.display="none";openDaily(j.data,j.c,j.title,j.moderator)}
+function resetMeetingMetrics(){meetingStartedAt=Date.now();participantSessions={};lastNetworkQuality="unknown";reconnectAttempts=0;recordingActive=false;screenShareActive=false;transcriptionActive=false}
+function saveMeetingMetrics(){if(!meetingStartedAt)return;const duration=Math.max(0,Math.round((Date.now()-meetingStartedAt)/1000));const a=get(histKey);const idx=a.findIndex(x=>x.code===currentCode);if(idx>=0){a[idx].duration=(a[idx].duration||0)+duration;a[idx].lastQuality=lastNetworkQuality;a[idx].participants=Object.keys(participantSessions).length;a[idx].reconnects=(a[idx].reconnects||0)+reconnectAttempts;put(histKey,a);}}
+function showMeetingTools(){document.querySelector("#toolsBox").style.display="flex";updateTechStats()}
+function closeMeetingTools(){document.querySelector("#toolsBox").style.display="none"}
+function showDashboard(){const a=get(histKey);const total=a.length;const durations=a.reduce((n,x)=>n+(x.duration||0),0);const participants=a.reduce((n,x)=>n+(x.participants||0),0);document.querySelector("#dashboardContent").innerHTML="<div class='notice success'><b>"+total+"</b> réunion(s) enregistrée(s)</div><div class='notice'>Durée cumulée : <b>"+Math.round(durations/60)+" min</b><br>Participations observées : <b>"+participants+"</b><br>Dernières réunions :</div>"+(a.length?a.slice(0,20).map(x=>"<div class='meet'><div><b>"+esc(x.title||"RUUNION DIRECT")+"</b><div class='small'>"+new Date(x.at).toLocaleString("fr-FR")+"</div><div class='code'>"+esc(x.code)+"</div><div class='small'>Durée "+Math.round((x.duration||0)/60)+" min · participants "+(x.participants||0)+" · réseau "+esc(x.lastQuality||"—")+" · reconnexions "+(x.reconnects||0)+"</div></div></div>").join(""):"<p class='small'>Aucune donnée.</p>");document.querySelector("#dashboardBox").style.display="flex"}
+function closeDashboard(){document.querySelector("#dashboardBox").style.display="none"}
+function showQr(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);const box=document.querySelector("#qrBox"),q=document.querySelector("#qrCanvas");q.innerHTML="";document.querySelector("#qrCodeText").textContent=currentCode;box.style.display="flex";if(window.QRCode)new QRCode(q,{text:u,width:220,height:220});else q.textContent=u}
+function closeQr(){document.querySelector("#qrBox").style.display="none"}
+function updateTechStats(){if(!callFrame)return;const p=callFrame.participants?callFrame.participants():{};const n=Object.keys(p||{}).length;let txt="Participants connectés : "+n+" · Qualité réseau : "+lastNetworkQuality;try{if(callFrame.getNetworkStats){const st=callFrame.getNetworkStats();txt+=" · Statistiques réseau disponibles";}}catch(e){}document.querySelector("#techStats").textContent=txt}
+async function startRecording(){if(!callFrame||!currentModerator)return showError("Seul le modérateur peut démarrer l’enregistrement.");if(typeof callFrame.startRecording!=="function")return showError("L’enregistrement n’est pas disponible dans cette configuration Daily.");try{await callFrame.startRecording({type:"cloud"});recordingActive=true;updateTechStats()}catch(e){showError("Impossible de démarrer l’enregistrement. Vérifiez les fonctions activées sur Daily.")}}
+async function stopRecording(){if(!callFrame||typeof callFrame.stopRecording!=="function")return;try{await callFrame.stopRecording();recordingActive=false;updateTechStats()}catch(e){showError("Impossible d’arrêter l’enregistrement.")}}
+async function toggleScreenShare(){if(!callFrame)return;if(typeof callFrame.startScreenShare!=="function")return showError("Le partage d’écran n’est pas disponible sur cet appareil.");try{if(!screenShareActive){await callFrame.startScreenShare();screenShareActive=true}else if(typeof callFrame.stopScreenShare==="function"){await callFrame.stopScreenShare();screenShareActive=false}updateTechStats()}catch(e){showError("Impossible de modifier le partage d’écran. Vérifiez les permissions.")}}
+async function toggleTranscription(){if(!callFrame||!currentModerator)return showError("Seul le modérateur peut démarrer la transcription.");if(typeof callFrame.startTranscription!=="function")return showError("La transcription n’est pas disponible dans cette configuration Daily.");try{if(!transcriptionActive){await callFrame.startTranscription();transcriptionActive=true}else if(typeof callFrame.stopTranscription==="function"){await callFrame.stopTranscription();transcriptionActive=false}updateTechStats()}catch(e){showError("Impossible d’activer la transcription/sous-titres. Vérifiez la configuration Daily.")}}
 function openDaily(data,c,title,moderator){
- currentRoom=data.roomName;currentUrl=data.url;currentCode=c;currentTitle=title;currentModerator=!!moderator;
+ currentRoom=data.roomName;currentUrl=data.url;currentCode=c;currentTitle=title;currentModerator=!!moderator;resetMeetingMetrics();
  document.querySelector("#call").style.display="block";document.querySelector("#daily").innerHTML="";
  document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur":"Participant";
  document.querySelector("#roleBadge").className=moderator?"success":"";
@@ -176,9 +208,12 @@ function openDaily(data,c,title,moderator){
   const joinOpts={url:data.url,showLocalVideo:true,showParticipantsBar:true,iframeStyle:{width:"100%",height:"100%"}};
   if(data.token)joinOpts.token=data.token;
   callFrame.on("joined-meeting",()=>{document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur actif":"Participant";document.querySelector("#roleBadge").className=moderator?"success":"";});
-  callFrame.on("participant-joined",refreshParticipants);callFrame.on("participant-left",refreshParticipants);callFrame.on("participant-updated",refreshParticipants);
+  callFrame.on("participant-joined",e=>{if(e?.participant?.session_id)participantSessions[e.participant.session_id]={joined:Date.now(),name:e.participant.user_name||"Participant"};refreshParticipants()});callFrame.on("participant-left",e=>{if(e?.participant?.session_id)participantSessions[e.participant.session_id].left=Date.now();refreshParticipants()});callFrame.on("participant-updated",refreshParticipants);
+  callFrame.on("recording-started",()=>{recordingActive=true;updateTechStats()});callFrame.on("recording-stopped",()=>{recordingActive=false;updateTechStats()});
+  callFrame.on("transcription-started",()=>{transcriptionActive=true;updateTechStats()});callFrame.on("transcription-stopped",()=>{transcriptionActive=false;updateTechStats()});
+
   callFrame.on("network-connection",e=>{const state=e?.type||e?.networkQuality||"unknown";setNetwork(state==="failed"||state==="bad"?false:true)});
-  callFrame.on("network-quality-change",e=>{const q=e?.networkQualityState||e?.quality||e?.threshold;if(q==="bad"||q==="warning")document.querySelector("#netBadge").textContent="● Réseau faible";else if(q==="good")document.querySelector("#netBadge").textContent="● Réseau OK";});
+  callFrame.on("network-quality-change",e=>{const q=e?.networkQualityState||e?.quality||e?.threshold||"unknown";lastNetworkQuality=String(q);if(q==="bad"||q==="warning")document.querySelector("#netBadge").textContent="● Réseau faible";else if(q==="good")document.querySelector("#netBadge").textContent="● Réseau OK";updateTechStats()});
 
   callFrame.on("error",(e)=>{document.querySelector("#roleBadge").textContent="Connexion interrompue";document.querySelector("#roleBadge").className="warn";showError("La connexion Daily a été interrompue. Vérifiez votre réseau puis réessayez.");console.error("Daily error",e)});
   callFrame.join(joinOpts).catch(e=>{document.querySelector("#roleBadge").textContent="Connexion impossible";document.querySelector("#roleBadge").className="warn";showError("Daily n’a pas pu établir la connexion : "+(e.message||"erreur inconnue"))});
@@ -192,13 +227,13 @@ function toggleParticipants(){const p=document.querySelector("#participantsPanel
 function setNetwork(ok){const n=document.querySelector("#netBadge");n.textContent=ok?"● Réseau OK":"● Réseau interrompu";n.className=ok?"":"warn"}
 function showError(t){document.querySelector("#errorText").textContent=t;document.querySelector("#errorBox").style.display="flex"}
 function closeError(){document.querySelector("#errorBox").style.display="none"}
-async function retryCall(){closeError();if(!currentJoinData){return}if(reconnectTimer)clearTimeout(reconnectTimer);reconnectTimer=setTimeout(()=>{if(currentJoinData)openDaily(currentJoinData.data,currentJoinData.c,currentJoinData.title,currentJoinData.moderator)},500)}
+async function retryCall(){closeError();if(!currentJoinData)return;if(reconnectTimer)clearTimeout(reconnectTimer);reconnectAttempts++;const delay=Math.min(15000,500*Math.pow(2,Math.min(reconnectAttempts-1,5)));reconnectTimer=setTimeout(()=>{if(currentJoinData)openDaily(currentJoinData.data,currentJoinData.c,currentJoinData.title,currentJoinData.moderator)},delay)}
 window.addEventListener("offline",()=>{setNetwork(false);if(callFrame)showError("Internet semble indisponible. La reconnexion sera tentée dès le retour du réseau.")});
 window.addEventListener("online",()=>{setNetwork(true);if(callFrame&&currentJoinData)retryCall()});
 async function checkServer(){try{const r=await fetch(API_ENDPOINT.replace("/meeting","/health"),{cache:"no-store"});if(!r.ok)throw new Error();document.querySelector("#startNotice").className="notice success";document.querySelector("#startNotice").textContent="Service de réunion opérationnel.";return true}catch(e){document.querySelector("#startNotice").className="notice warn";document.querySelector("#startNotice").textContent="Service temporairement indisponible. Réessayez dans quelques instants.";return false}}
-async function closeCall(){if(callFrame){try{callFrame.leave()}catch(e){}try{callFrame.destroy()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";document.querySelector("#participantsPanel").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;currentJoinData=null;busy=false}
+async function closeCall(){saveMeetingMetrics();if(callFrame){try{callFrame.leave()}catch(e){}try{callFrame.destroy()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";document.querySelector("#participantsPanel").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;currentJoinData=null;busy=false}
 async function copyLink(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);try{await navigator.clipboard.writeText(u);alert("Lien copié.");}catch(e){const ta=document.createElement("textarea");ta.value=u;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("Lien copié.")}}
-function showQr(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);const w=window.open("","_blank");if(w){const html='<title>QR RUUNION DIRECT</title><div style="font-family:Arial;text-align:center;padding:30px"><h2>Scanner pour rejoindre</h2><div id="q"></div><p>'+esc(currentCode)+'</p></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\\/script><script>new QRCode(document.getElementById("q"),'+JSON.stringify(u)+')<\\/script>';w.document.write(html);w.document.close();}}
+function showQrLegacy(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);const w=window.open("","_blank");if(w){const html='<title>QR RUUNION DIRECT</title><div style="font-family:Arial;text-align:center;padding:30px"><h2>Scanner pour rejoindre</h2><div id="q"></div><p>'+esc(currentCode)+'</p></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\\/script><script>new QRCode(document.getElementById("q"),'+JSON.stringify(u)+')<\\/script>';w.document.write(html);w.document.close();}}
 function share(){
  const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);
  const t="Rejoins-moi sur RUUNION DIRECT : "+u+"\nCode : "+currentCode;
@@ -221,7 +256,7 @@ function render(){
  const j=document.createElement("button");j.textContent="Démarrer";j.onclick=()=>createMeeting(true,m.code);
  const del=document.createElement("button");del.textContent="Supprimer";del.className="danger";del.style.marginLeft="6px";del.onclick=()=>removeMeeting(m.id);actions.append(j,del);d.append(info,actions);l.appendChild(d)});
 }
-function addHistory(title,c){const a=get(histKey).filter(x=>x.code!==c);a.unshift({title,code:c,at:Date.now()});put(histKey,a.slice(0,20));renderHistory()}
+function addHistory(title,c){const a=get(histKey).filter(x=>x.code!==c);a.unshift({title,code:c,at:Date.now(),duration:0,participants:0,reconnects:0,lastQuality:"unknown"});put(histKey,a.slice(0,50));renderHistory()}
 function renderHistory(){
  const a=get(histKey),l=document.querySelector("#history");l.innerHTML=a.length?"":"<p class='small'>Aucune réunion récente.</p>";
  a.forEach(m=>{const d=document.createElement("div");d.className="meet";d.innerHTML="<div><b>"+esc(m.title)+"</b><div class='small'>"+new Date(m.at).toLocaleString("fr-FR")+"</div><div class='code'>"+esc(m.code)+"</div></div>";const b=document.createElement("button");b.textContent="Rejoindre";b.onclick=()=>joinCode(m.code);d.appendChild(b);l.appendChild(d)})
