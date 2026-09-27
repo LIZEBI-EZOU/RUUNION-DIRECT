@@ -33,16 +33,16 @@ async function createRoom(code,title){
  const roomName="ruunion-"+safe(code,40).toLowerCase();
  const exp=Math.floor(Date.now()/1000)+24*60*60;
  try{
-  const data=await daily("/rooms",{name:roomName,privacy:"public",properties:{exp,max_participants:200,enable_prejoin_ui:true,start_video_off:true,start_audio_off:true,enable_screenshare:true,enable_chat:true,enable_noise_cancellation_ui:true,lang:"fr"}});
+  const data=await daily("/rooms",{name:roomName,privacy:"private",properties:{exp,max_participants:200,enable_prejoin_ui:true,start_video_off:true,start_audio_off:true,enable_screenshare:true,enable_chat:true,enable_noise_cancellation_ui:true,lang:"fr"}});
   return {roomName:data.name||roomName,url:data.url||("https://"+DAILY_DOMAIN+"/"+encodeURIComponent(roomName)),exp};
  }catch(e){
   if(e.status===409)return {roomName,url:"https://"+DAILY_DOMAIN+"/"+encodeURIComponent(roomName),exp};
   throw e;
  }
 }
-async function createToken(roomName,name,email,exp){
+async function createToken(roomName,name,email,exp,moderator){
  const userId=crypto.createHash("sha256").update((email||name||"guest")+"|"+roomName).digest("hex").slice(0,32);
- const data=await daily("/meeting-tokens",{properties:{room_name:roomName,eject_at_token_exp:true,exp,is_owner:true,user_name:safe(name||"Modérateur",80),user_id:userId,enable_screenshare:true,start_video_off:true,start_audio_off:true,enable_prejoin_ui:true,lang:"fr"}});
+ const data=await daily("/meeting-tokens",{properties:{room_name:roomName,eject_at_token_exp:true,exp,is_owner:!!moderator,user_name:safe(name||"Invité",80),user_id:userId,enable_screenshare:true,start_video_off:true,start_audio_off:true,enable_prejoin_ui:true,lang:"fr"}});
  return data.token;
 }
 async function handle(req,res){
@@ -59,7 +59,7 @@ async function handle(req,res){
  if(!code)return json(res,400,{error:"invalid_code",message:"Code de réunion manquant."},origin);
  try{
   const room=await createRoom(code,safe(body.title,120));
-  const token=moderator?await createToken(room.roomName,name,email,room.exp):null;
+  const token=await createToken(room.roomName,name,email,room.exp,moderator);
   return json(res,200,{ok:true,roomName:room.roomName,url:room.url,token,code,title:safe(body.title,120)||"RUUNION DIRECT",expiresAt:room.exp},origin);
  }catch(e){return json(res,502,{error:"daily_error",message:"Daily n'a pas pu préparer la réunion."},origin)}
 }
