@@ -18,6 +18,8 @@ public class MainActivity extends Activity {
  @Override public void onCreate(Bundle state){
   super.onCreate(state);
   webView=new WebView(this);
+  android.webkit.CookieManager.getInstance().setAcceptCookie(true);
+  if(Build.VERSION.SDK_INT>=21)android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
   WebSettings s=webView.getSettings();
   s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setDatabaseEnabled(true);
   s.setMediaPlaybackRequiresUserGesture(false);s.setAllowFileAccess(false);s.setAllowContentAccess(false);
