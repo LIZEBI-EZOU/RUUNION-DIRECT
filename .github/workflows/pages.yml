@@ -21,15 +21,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
+
+      - name: Check whether GitHub Pages is enabled
+        id: pages_check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -sS -o /tmp/pages.json -w "%{http_code}"             -H "Authorization: Bearer $GH_TOKEN"             -H "Accept: application/vnd.github+json"             "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages")
+          if [ "$code" = "200" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "GitHub Pages n'est pas encore active (HTTP $code)."
+            echo "Activez Settings > Pages > Source: GitHub Actions, puis relancez ce workflow."
+          fi
+
+      - name: Configure GitHub Pages
+        if: steps.pages_check.outputs.enabled == 'true'
+        uses: actions/configure-pages@v5
+
       - name: Prepare web site
+        if: steps.pages_check.outputs.enabled == 'true'
         run: |
           rm -rf site
           mkdir -p site
           cp app/src/main/assets/index.html site/index.html
           cp app/src/main/assets/ruunion-logo.png site/ruunion-logo.png
-      - uses: actions/upload-pages-artifact@v3
+
+      - name: Upload GitHub Pages artifact
+        if: steps.pages_check.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v4
         with:
           path: site
-      - id: deployment
+
+      - name: Deploy to GitHub Pages
+        if: steps.pages_check.outputs.enabled == 'true'
+        id: deployment
         uses: actions/deploy-pages@v4
