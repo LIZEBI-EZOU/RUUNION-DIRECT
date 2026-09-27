@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
    @Override public void onPermissionRequest(final PermissionRequest r){
     runOnUiThread(()->{
      Uri origin=r.getOrigin();
-     if(origin==null||!"https".equals(origin.getScheme())||!"meet.jit.si".equalsIgnoreCase(origin.getHost())){r.deny();return;}
+     if(origin==null||!"https".equals(origin.getScheme())||!"ezouservicesmeeting.daily.co".equalsIgnoreCase(origin.getHost())){r.deny();return;}
      List<String>a=new ArrayList<>();
      for(String x:r.getResources())if(PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(x)||PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(x))a.add(x);
      if(!a.isEmpty())r.grant(a.toArray(new String[0]));else r.deny();
