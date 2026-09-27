@@ -47,6 +47,8 @@ jobs:
           mkdir -p site
           cp app/src/main/assets/index.html site/index.html
           cp app/src/main/assets/ruunion-logo.png site/ruunion-logo.png
+          cp app/src/main/assets/manifest.webmanifest site/manifest.webmanifest
+          cp app/src/main/assets/sw.js site/sw.js
 
       - name: Upload GitHub Pages artifact
         if: steps.pages_check.outputs.enabled == 'true'
