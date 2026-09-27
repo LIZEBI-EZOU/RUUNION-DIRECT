@@ -100,8 +100,11 @@ function saveProfile(){const n=document.querySelector("#name").value.trim(),e=do
 function loadProfile(){const p=getProfile();if(p.name)document.querySelector("#name").value=p.name;document.querySelector("#email").value=p.email||"ezouservices@gmail.com"}
 function identity(){if(!saveProfile()){alert("Veuillez saisir une adresse e-mail valide.");return null}const p=getProfile();return{name:p.name||"Invité",email:p.email||"ezouservices@gmail.com"}}
 
+let busy=false;
 async function createMeeting(asModerator,forcedCode){
+ if(busy)return;
  const p=identity();if(!p)return;
+ busy=true;
  const title=document.querySelector("#title").value.trim()||"Réunion instantanée";
  const c=forcedCode||code();
  const notice=document.querySelector("#startNotice");notice.className="notice";notice.textContent="Création de la réunion…";
@@ -114,8 +117,8 @@ async function createMeeting(asModerator,forcedCode){
   addHistory(title,c);
  }catch(e){
   notice.className="notice warn";notice.textContent="Impossible de démarrer la réunion pour le moment. Vérifiez la connexion au service Daily.";
-  alert("RUUNION DIRECT : "+e.message);
- }
+  alert("RUUNION DIRECT : "+(e.message||"Une erreur est survenue."));
+ } finally { busy=false; }
 }
 function instant(asModerator){createMeeting(asModerator)}
 async function join(){
@@ -140,12 +143,13 @@ function openDaily(data,c,title,moderator){
   const joinOpts={url:data.url,showLocalVideo:true,showParticipantsBar:true,iframeStyle:{width:"100%",height:"100%"}};
   if(data.token)joinOpts.token=data.token;
   callFrame.on("joined-meeting",()=>{document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur actif":"Participant";});
-  callFrame.on("error",()=>{document.querySelector("#roleBadge").textContent="Erreur de connexion";document.querySelector("#roleBadge").className="warn"});
+  callFrame.on("joined-meeting",()=>{document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur actif":"Participant";document.querySelector("#roleBadge").className=moderator?"success":"";});
+  callFrame.on("error",(e)=>{document.querySelector("#roleBadge").textContent="Erreur de connexion";document.querySelector("#roleBadge").className="warn";console.error("Daily error",e)});
   callFrame.join(joinOpts).catch(e=>{document.querySelector("#roleBadge").textContent="Connexion impossible";document.querySelector("#roleBadge").className="warn";alert("Connexion Daily impossible : "+e.message)});
   setTimeout(()=>{try{callFrame.setLocalAudio(!muted);callFrame.setLocalVideo(!muted)}catch(e){}},1200);
  }catch(e){document.querySelector("#roleBadge").textContent="Daily indisponible";document.querySelector("#roleBadge").className="warn";alert("Daily ne peut pas être chargé dans cette version.");}
 }
-function closeCall(){if(callFrame){try{callFrame.destroy()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";currentRoom="";currentUrl=""}
+function closeCall(){if(callFrame){try{callFrame.leave()}catch(e){}try{callFrame.destroy()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;busy=false}
 function share(){
  const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);
  const t="Rejoins-moi sur RUUNION DIRECT : "+u+"\nCode : "+currentCode;
@@ -160,7 +164,7 @@ function schedule(){
  const m={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),title,date,code:code()};
  const a=get(key);a.push(m);put(key,a);scheduleNative(m);render();document.querySelector("#schedTitle").value="";document.querySelector("#schedDate").value="";
 }
-function scheduleNative(m){const when=new Date(m.date).getTime()-10*60*1000;if(android)AndroidBridge.scheduleNotification(m.id,m.title,m.code,Math.max(Date.now()+1000,when));else if("Notification"in window&&Notification.permission==="granted")setTimeout(()=>new Notification(m.title,{body:"Réunion dans 10 minutes — code : "+m.code}),Math.max(0,when-Date.now()))}
+function scheduleNative(m){const when=new Date(m.date).getTime()-10*60*1000;if(!Number.isFinite(when))return;if(android)AndroidBridge.scheduleNotification(m.id,m.title,m.code,Math.max(Date.now()+1000,when));else if("Notification"in window&&Notification.permission==="granted"){const delay=Math.max(0,when-Date.now());if(delay<=2147483647)setTimeout(()=>new Notification(m.title,{body:"Réunion dans 10 minutes — code : "+m.code}),delay)}}
 function removeMeeting(id){if(android)AndroidBridge.cancelNotification(id);put(key,get(key).filter(x=>x.id!==id));render()}
 function render(){
  const a=get(key).sort((x,y)=>new Date(x.date)-new Date(y.date)),l=document.querySelector("#list");l.innerHTML=a.length?"":"<p class='small'>Aucune réunion programmée.</p>";
