@@ -3,15 +3,20 @@ on:
   workflow_dispatch:
   push:
     paths: ["app/**","*.gradle","gradle.properties",".github/workflows/android.yml"]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: "17" }
+        with:
+          distribution: temurin
+          java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
-        with: { gradle-version: "8.10.2" }
+        with:
+          gradle-version: "8.10.2"
+
       - name: Validate permanent signing secrets
         env:
           KEYSTORE_B64: ${{ secrets.RUUNION_KEYSTORE_B64 }}
@@ -23,17 +28,39 @@ jobs:
           test -n "$KEYSTORE_PASSWORD" || (echo "Missing RUUNION_KEYSTORE_PASSWORD" && exit 1)
           test -n "$KEY_ALIAS" || (echo "Missing RUUNION_KEY_ALIAS" && exit 1)
           test -n "$KEY_PASSWORD" || (echo "Missing RUUNION_KEY_PASSWORD" && exit 1)
-      - name: Restore permanent keystore
+
+      - name: Restore permanent JKS
         env:
           KEYSTORE_B64: ${{ secrets.RUUNION_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.RUUNION_KEYSTORE_PASSWORD }}
         run: |
-          echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/ruunion-release.jks"
-          keytool -list -keystore 
-          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks "$KS" --ks-pass env:KSP --ks-key-alias "$KA" --key-pass env:KP --out app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-release-unsigned.apk
-          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/ruunion-release.jks"
+          test -s "$RUNNER_TEMP/ruunion-release.jks"
+          keytool -list -keystore "$RUNNER_TEMP/ruunion-release.jks" -storepass "$KEYSTORE_PASSWORD" >/dev/null
+
+      - name: Build unsigned release
+        run: gradle --no-daemon :app:assembleRelease
+
+      - name: Sign release with permanent JKS
+        env:
+          KS: ${{ runner.temp }}/ruunion-release.jks
+          KSP: ${{ secrets.RUUNION_KEYSTORE_PASSWORD }}
+          KA: ${{ secrets.RUUNION_KEY_ALIAS }}
+          KP: ${{ secrets.RUUNION_KEY_PASSWORD }}
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign             --ks "$KS"             --ks-pass env:KSP             --ks-key-alias "$KA"             --key-pass env:KP             --out app/build/outputs/apk/release/app-release.apk             app/build/outputs/apk/release/app-release-unsigned.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+
       - uses: actions/upload-artifact@v4
-        with: { name: ruunion-direct-release-apk, path: app/build/outputs/apk/release/app-release.apk, retention-days: 90 }
+        with:
+          name: ruunion-direct-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 90
+
       - name: Build debug
         run: gradle --no-daemon :app:assembleDebug
+
       - uses: actions/upload-artifact@v4
-        with: { name: ruunion-direct-debug-apk, path: app/build/outputs/apk/debug/app-debug.apk }
+        with:
+          name: ruunion-direct-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
