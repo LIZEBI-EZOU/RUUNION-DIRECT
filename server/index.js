@@ -35,6 +35,10 @@ async function dailyRequest(method,path,body){
 async function daily(path,body){return dailyRequest("POST",path,body)}
 let dailyReady=false;
 async function verifyDaily(){try{await dailyRequest("GET","/");dailyReady=true;console.log("Daily connectivity check: OK",DAILY_DOMAIN)}catch(e){dailyReady=false;console.error("Daily connectivity check failed:",{status:e.status||0,code:e.dailyCode||"",message:e.message||""})}}
+async function getExistingRoom(roomName){
+ const existing=await dailyRequest("GET","/rooms/"+encodeURIComponent(roomName));
+ return {roomName:existing.name||roomName,url:existing.url||("https://"+DAILY_DOMAIN+"/"+encodeURIComponent(roomName)),exp:Number(existing.config?.exp||Math.floor(Date.now()/1000)+24*60*60)};
+}
 async function createRoom(code,title){
  const roomName="ruunion-"+safe(code,40).toLowerCase();
  const exp=Math.floor(Date.now()/1000)+24*60*60;
@@ -70,12 +74,12 @@ async function handle(req,res){
  let raw="";for await(const chunk of req){raw+=chunk;if(raw.length>10000)break}
  if(raw.length>10000)return json(res,413,{error:"payload_too_large"},origin);
  let body;try{body=JSON.parse(raw)}catch{return json(res,400,{error:"invalid_json"},origin)}
- const code=safe(body.code,40).toLowerCase(),name=safe(body.name,80)||"Invité",email=String(body.email||"").trim().slice(0,160),moderator=body.moderator===true;
- if(!code)return json(res,400,{error:"invalid_code",message:"Code de réunion manquant."},origin);
+ const code=safe(body.code,40).toLowerCase(),requestedRoom=safe(body.roomName,100).toLowerCase(),name=safe(body.name,80)||"Invité",email=String(body.email||"").trim().slice(0,160),moderator=body.moderator===true;
+ if(!code&&!requestedRoom)return json(res,400,{error:"invalid_code",message:"Lien ou code de réunion manquant."},origin);
  try{
-  const room=await createRoom(code,safe(body.title,120));
+  const room=requestedRoom?await getExistingRoom(requestedRoom):await createRoom(code,safe(body.title,120));
   const token=await createToken(room.roomName,name,email,room.exp,moderator);
-  return json(res,200,{ok:true,roomName:room.roomName,url:room.url,token,code,title:safe(body.title,120)||"RUUNION DIRECT",expiresAt:room.exp},origin);
+  return json(res,200,{ok:true,roomName:room.roomName,url:room.url,token,code:code||requestedRoom.replace(/^ruunion-/,""),title:safe(body.title,120)||"RUUNION DIRECT",expiresAt:room.exp},origin);
  }catch(e){
   console.error("Daily meeting preparation failed:",{status:e.status||0,code:e.dailyCode||"",message:e.message||""});
   const message=e.status===401||e.status===403?"Le service Daily refuse l’accès du serveur. Vérifiez la clé Daily dans Render.":e.status===429?"Daily limite temporairement les demandes. Réessayez dans quelques instants.":"Daily n’a pas pu préparer la salle. Réessayez dans quelques instants.";
