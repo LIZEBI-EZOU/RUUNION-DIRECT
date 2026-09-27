@@ -1,4 +1,5 @@
 name: Build RUUNION DIRECT APK
+# Full release validation: compile, permanent signing and apksigner verification
 on:
   workflow_dispatch:
   push:
