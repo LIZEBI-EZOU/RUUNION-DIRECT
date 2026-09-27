@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RÉUNION DIRECT</title>
-<script src="https://meet.jit.si/external_api.js"></script>
+<script src="https://8x8.vc/vpaas-magic-cookie-b2b67b10aa9c47f3a51b4ec37ad2194d/external_api.js"></script>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b4ea2"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f5f9ff;color:#12304f;font-family:Arial,sans-serif}
@@ -96,7 +96,7 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 
 <div class="card">
 <h2>Service de réunion</h2>
-<p class="small">Réunions vidéo fournies par Jitsi Meet sur <b>meet.jit.si</b>.</p>
+<p class="small">Réunions vidéo sécurisées par JaaS sur <b>8x8.vc</b>. Aucun compte RÉUNION DIRECT n’est requis.</p>
 </div>
 </main>
 
@@ -126,7 +126,9 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 <div id="dashboardBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:48;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(680px,100%);max-height:85vh;overflow:auto;background:#fff;border-radius:18px;padding:20px"><h2>Tableau de bord</h2><div id="dashboardContent"></div><button class="muted" onclick="closeDashboard()">Fermer</button></div></div>
 <div id="errorBox"><div class="box"><h2>Connexion interrompue</h2><p id="errorText" class="small">La connexion à la réunion a été interrompue.</p><div class="row"><button class="muted" onclick="closeError()">Fermer</button><button onclick="retryCall()">Réessayer</button></div></div></div>
 <script>
-const JITSI_DOMAIN="meet.jit.si";
+const JITSI_DOMAIN="8x8.vc";
+const JAAS_APP_ID="vpaas-magic-cookie-b2b67b10aa9c47f3a51b4ec37ad2194d";
+const API_BASE="https://ruunion-direct-api.onrender.com";
 const PUBLIC_WEB_URL=location.origin+"/";
 let callFrame=null,currentRoom="",currentUrl="",currentTitle="",currentCode="",currentModerator=false,currentJoinData=null,preflightStream=null,reconnectTimer=null;
 let meetingStartedAt=0,participantSessions={},lastNetworkQuality="unknown",reconnectAttempts=0;
@@ -142,15 +144,21 @@ function getProfile(){try{return JSON.parse(localStorage.getItem(profileKey)||"{
 function saveProfile(){const n=document.querySelector("#name").value.trim(),e=document.querySelector("#email").value.trim().toLowerCase();if(e&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return false;put(profileKey,{name:n,email:e||"guest@ruunion.direct"});return true}
 function loadProfile(){const p=getProfile();if(p.name)document.querySelector("#name").value=p.name;if(p.email)document.querySelector("#email").value=p.email}
 function identity(){if(!saveProfile()){alert("Veuillez saisir une adresse e-mail valide.");return null}const p=getProfile();return{name:p.name||"Invité",email:p.email||""}}
-function roomFromCode(c){return "RUUNION-DIRECT-"+String(c||code()).replace(/[^a-zA-Z0-9_-]/g,"-").slice(0,50)}
-function roomUrl(room){return "https://"+JITSI_DOMAIN+"/"+encodeURIComponent(room)}
-function buildData(room,title,name,email,moderator){return{roomName:room,url:roomUrl(room),title:title||"RÉUNION DIRECT",name,email,moderator:!!moderator}}
+function roomFromCode(c){return String(c||code()).replace(/[^a-zA-Z0-9_-]/g,"-").slice(0,50)}
+function roomUrl(room){return "https://"+JITSI_DOMAIN+"/"+JAAS_APP_ID+"/"+encodeURIComponent(room)}
+function buildData(room,title,name,email,moderator){return{roomName:JAAS_APP_ID+"/"+room,url:roomUrl(room),title:title||"RÉUNION DIRECT",name,email,moderator:!!moderator}}
 let busy=false;
+async function requestJaasMeeting(room,title,name,email,moderator){
+ const r=await fetch(API_BASE+"/meeting",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({roomName:room,title,name,email,moderator:!!moderator})});
+ const data=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(data.message||"Le serveur JaaS n’a pas pu générer le JWT.");
+ return data;
+}
 async function createMeeting(asModerator,forcedCode){
  if(busy)return; const p=identity();if(!p)return; busy=true;
  const title=document.querySelector("#title").value.trim()||"RÉUNION DIRECT",c=forcedCode||code(),room=roomFromCode(c);
  const notice=document.querySelector("#startNotice");notice.className="notice";notice.textContent="Ouverture de la réunion Jitsi…";
- try{const data=buildData(room,title,p.name,p.email,asModerator);notice.className="notice success";notice.textContent="Salle prête. Ouverture directe…";await prepareAndOpen(data,c,title,asModerator);addHistory(title,c);}
+ try{const tokenData=await requestJaasMeeting(room,title,p.name,p.email,asModerator);const data={roomName:tokenData.roomName,url:tokenData.url,title,name:p.name,email:p.email,moderator:asModerator,token:tokenData.token};notice.className="notice success";notice.textContent="Salle JaaS prête. Ouverture sécurisée…";await prepareAndOpen(data,c,title,asModerator);addHistory(title,c);}
  catch(e){notice.className="notice warn";notice.textContent="Impossible d’ouvrir la réunion. Vérifiez Internet puis réessayez.";showError("Jitsi n’a pas pu ouvrir la réunion : "+(e.message||"erreur inconnue"))}
  finally{busy=false}
 }
@@ -160,9 +168,9 @@ async function join(){
  const p=identity();if(!p)return;
  try{
   let room;
-  if(raw){const u=new URL(raw);if(u.hostname.toLowerCase()!==JITSI_DOMAIN)throw new Error("Lien Jitsi non reconnu.");const parts=u.pathname.split("/").filter(Boolean);if(!parts.length)throw new Error("Lien incomplet.");room=decodeURIComponent(parts[parts.length-1]);}
+  if(raw){const u=new URL(raw);if(u.hostname.toLowerCase()!==JITSI_DOMAIN)throw new Error("Lien JaaS non reconnu.");const parts=u.pathname.split("/").filter(Boolean);if(parts.length<2||parts[0]!==JAAS_APP_ID)throw new Error("Lien JaaS incomplet.");room=decodeURIComponent(parts[parts.length-1]);}
   else room=roomFromCode(c);
-  const title="RÉUNION DIRECT",data=buildData(room,title,p.name,p.email,false);
+  const title="RÉUNION DIRECT",tokenData=await requestJaasMeeting(room,title,p.name,p.email,false),data={roomName:tokenData.roomName,url:tokenData.url,title,name:p.name,email:p.email,moderator:false,token:tokenData.token};
   await prepareAndOpen(data,c||room,title,false);addHistory(title,c||room);
  }catch(e){document.querySelector("#startNotice").className="notice warn";document.querySelector("#startNotice").textContent="Impossible de rejoindre la réunion.";showError("Impossible de rejoindre directement la réunion : "+e.message)}
 }
@@ -189,13 +197,13 @@ function startRecording(){showError("L’enregistrement n’est pas activé par 
 function stopRecording(){}
 function toggleScreenShare(){if(!callFrame)return;try{callFrame.executeCommand("toggleShareScreen")}catch(e){showError("Le partage d’écran n’est pas disponible sur cet appareil.")}}
 function toggleTranscription(){showError("La transcription n’est pas activée sur la salle publique Jitsi.")}
-function openJitsi(data,c,title,moderator){
+async function openJitsi(data,c,title,moderator){
  currentRoom=data.roomName;currentUrl=data.url;currentCode=c;currentTitle=title;currentModerator=!!moderator;document.querySelector("#call").style.display="block";document.querySelector("#daily").innerHTML="";
  document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur":"Participant";document.querySelector("#roleBadge").className=moderator?"success":"";
  if(callFrame){try{callFrame.dispose()}catch(e){}callFrame=null}
  try{
   const muted=document.querySelector("#mute").checked;
-  const options={roomName:data.roomName,parentNode:document.querySelector("#daily"),width:"100%",height:"100%",domain:JITSI_DOMAIN,lang:"fr",userInfo:{displayName:data.name,email:data.email},configOverwrite:{prejoinConfig:{enabled:true},startWithAudioMuted:muted,startWithVideoMuted:muted,disableInviteFunctions:false,enableWelcomePage:false,enableClosePage:false},interfaceConfigOverwrite:{MOBILE_APP_PROMO:false,SHOW_JITSI_WATERMARK:false,SHOW_WATERMARK_FOR_GUESTS:false,DISABLE_JOIN_LEAVE_NOTIFICATIONS:false}};
+  const options={roomName:data.roomName,parentNode:document.querySelector("#daily"),width:"100%",height:"100%",domain:JITSI_DOMAIN,lang:"fr",jwt:data.token,userInfo:{displayName:data.name,email:data.email},configOverwrite:{prejoinConfig:{enabled:true},startWithAudioMuted:muted,startWithVideoMuted:muted,disableInviteFunctions:false,enableWelcomePage:false,enableClosePage:false},interfaceConfigOverwrite:{MOBILE_APP_PROMO:false,SHOW_JITSI_WATERMARK:false,SHOW_WATERMARK_FOR_GUESTS:false,DISABLE_JOIN_LEAVE_NOTIFICATIONS:false}};
   callFrame=new JitsiMeetExternalAPI(JITSI_DOMAIN,options);
   callFrame.addListener("videoConferenceJoined",e=>{document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur actif":"Participant";document.querySelector("#roleBadge").className=moderator?"success":"";setNetwork(true);refreshParticipants()});
   callFrame.addListener("participantJoined",e=>{if(e?.id)participantSessions[e.id]={joined:Date.now(),name:e.displayName||"Participant"};refreshParticipants()});
@@ -218,7 +226,7 @@ function closeError(){document.querySelector("#errorBox").style.display="none"}
 async function retryCall(){closeError();if(!currentJoinData)return;if(reconnectTimer)clearTimeout(reconnectTimer);reconnectAttempts++;const delay=Math.min(15000,500*Math.pow(2,Math.min(reconnectAttempts-1,5)));reconnectTimer=setTimeout(()=>{if(currentJoinData){if(callFrame){try{callFrame.dispose()}catch(e){}callFrame=null}openJitsi(currentJoinData.data,currentJoinData.c,currentJoinData.title,currentJoinData.moderator)}},delay)}
 window.addEventListener("offline",()=>{setNetwork(false);if(callFrame)showError("Internet semble indisponible. La reconnexion sera tentée au retour du réseau.")});
 window.addEventListener("online",()=>{setNetwork(true);if(callFrame&&currentJoinData)retryCall()});
-async function checkServer(){document.querySelector("#startNotice").className="notice success";document.querySelector("#startNotice").textContent="Jitsi Meet est disponible. Aucun serveur Jitsi n’est nécessaire pour démarrer une réunion.";return true}
+async function checkServer(){try{const r=await fetch(API_BASE+"/health");const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||"Backend indisponible");document.querySelector("#startNotice").className="notice success";document.querySelector("#startNotice").textContent="JaaS est prêt. Le serveur RÉUNION DIRECT génère les JWT sécurisés.";return true}catch(e){document.querySelector("#startNotice").className="notice warn";document.querySelector("#startNotice").textContent="Le serveur JaaS est temporairement indisponible. Les réunions pourront démarrer dès que le service sera prêt.";return false}}
 async function closeCall(){saveMeetingMetrics();if(callFrame){try{callFrame.dispose()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";document.querySelector("#participantsPanel").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;currentJoinData=null;busy=false}
 async function copyLink(){const u=currentUrl||roomUrl(currentRoom);try{await navigator.clipboard.writeText(u);alert("Lien copié.")}catch(e){const ta=document.createElement("textarea");ta.value=u;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("Lien copié.")}}
 function share(){const u=currentUrl||roomUrl(currentRoom),t="Rejoins-moi sur RÉUNION DIRECT : "+u+"\nCode : "+currentCode;if(navigator.share)navigator.share({title:"RÉUNION DIRECT",text:t,url:u}).catch(()=>{});else if(android)AndroidBridge.openMeetingInBrowser("https://wa.me/?text="+encodeURIComponent(t));else window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank","noopener")}
