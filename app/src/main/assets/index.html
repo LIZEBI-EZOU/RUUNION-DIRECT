@@ -177,12 +177,17 @@ function openDaily(data,c,title,moderator){
   if(data.token)joinOpts.token=data.token;
   callFrame.on("joined-meeting",()=>{document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur actif":"Participant";document.querySelector("#roleBadge").className=moderator?"success":"";});
   callFrame.on("participant-joined",refreshParticipants);callFrame.on("participant-left",refreshParticipants);callFrame.on("participant-updated",refreshParticipants);
+  callFrame.on("network-connection",e=>{const state=e?.type||e?.networkQuality||"unknown";setNetwork(state==="failed"||state==="bad"?false:true)});
+  callFrame.on("network-quality-change",e=>{const q=e?.networkQualityState||e?.quality||e?.threshold;if(q==="bad"||q==="warning")document.querySelector("#netBadge").textContent="● Réseau faible";else if(q==="good")document.querySelector("#netBadge").textContent="● Réseau OK";});
+
   callFrame.on("error",(e)=>{document.querySelector("#roleBadge").textContent="Connexion interrompue";document.querySelector("#roleBadge").className="warn";showError("La connexion Daily a été interrompue. Vérifiez votre réseau puis réessayez.");console.error("Daily error",e)});
   callFrame.join(joinOpts).catch(e=>{document.querySelector("#roleBadge").textContent="Connexion impossible";document.querySelector("#roleBadge").className="warn";showError("Daily n’a pas pu établir la connexion : "+(e.message||"erreur inconnue"))});
   setTimeout(()=>{try{callFrame.setLocalAudio(!muted);callFrame.setLocalVideo(!muted)}catch(e){}},1200);
  }catch(e){document.querySelector("#roleBadge").textContent="Daily indisponible";document.querySelector("#roleBadge").className="warn";alert("Daily ne peut pas être chargé dans cette version.");}
 }
-async function refreshParticipants(){if(!callFrame)return;try{const p=callFrame.participants();const list=document.querySelector("#participantsList");const all=Object.values(p||{});list.innerHTML=all.length?all.map(x=>{const owner=x.owner?" ⭐":"";return "<div class=participant><span>"+esc(x.user_name||"Participant")+owner+"</span><span>"+(x.local?"Vous":"")+"</span></div>"}).join(""):"<p class=small>Aucun participant.</p>"}catch(e){}}
+async function refreshParticipants(){if(!callFrame)return;try{const p=callFrame.participants();const list=document.querySelector("#participantsList");const all=Object.values(p||{});list.innerHTML=all.length?all.map(x=>{const owner=x.owner?" ⭐":"";const controls=(currentModerator&&!x.local&&!x.owner)?'<button class="muted" style="padding:4px 7px;font-size:11px" onclick="muteParticipant('+JSON.stringify(x.session_id)+')">Muet</button><button class="danger" style="padding:4px 7px;font-size:11px;margin-left:4px" onclick="ejectParticipant('+JSON.stringify(x.session_id)+')">Retirer</button>':'';return "<div class=participant><span>"+esc(x.user_name||"Participant")+owner+(x.local?" — Vous":"")+"</span><span>"+controls+"</span></div>"}).join(""):"<p class=small>Aucun participant.</p>"}catch(e){}}
+async function muteParticipant(id){if(!callFrame||!currentModerator)return;try{await callFrame.updateParticipant(id,{setAudio:false});refreshParticipants()}catch(e){showError("Impossible de couper le microphone de ce participant.")}}
+async function ejectParticipant(id){if(!callFrame||!currentModerator)return;if(!confirm("Retirer ce participant de la réunion ?"))return;try{await callFrame.updateParticipant(id,{eject:true});refreshParticipants()}catch(e){showError("Impossible de retirer ce participant.")}}
 function toggleParticipants(){const p=document.querySelector("#participantsPanel");p.style.display=p.style.display==="block"?"none":"block";if(p.style.display==="block")refreshParticipants()}
 function setNetwork(ok){const n=document.querySelector("#netBadge");n.textContent=ok?"● Réseau OK":"● Réseau interrompu";n.className=ok?"":"warn"}
 function showError(t){document.querySelector("#errorText").textContent=t;document.querySelector("#errorBox").style.display="flex"}
@@ -190,6 +195,7 @@ function closeError(){document.querySelector("#errorBox").style.display="none"}
 async function retryCall(){closeError();if(!currentJoinData){return}if(reconnectTimer)clearTimeout(reconnectTimer);reconnectTimer=setTimeout(()=>{if(currentJoinData)openDaily(currentJoinData.data,currentJoinData.c,currentJoinData.title,currentJoinData.moderator)},500)}
 window.addEventListener("offline",()=>{setNetwork(false);if(callFrame)showError("Internet semble indisponible. La reconnexion sera tentée dès le retour du réseau.")});
 window.addEventListener("online",()=>{setNetwork(true);if(callFrame&&currentJoinData)retryCall()});
+async function checkServer(){try{const r=await fetch(API_ENDPOINT.replace("/meeting","/health"),{cache:"no-store"});if(!r.ok)throw new Error();document.querySelector("#startNotice").className="notice success";document.querySelector("#startNotice").textContent="Service de réunion opérationnel.";return true}catch(e){document.querySelector("#startNotice").className="notice warn";document.querySelector("#startNotice").textContent="Service temporairement indisponible. Réessayez dans quelques instants.";return false}}
 async function closeCall(){if(callFrame){try{callFrame.leave()}catch(e){}try{callFrame.destroy()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";document.querySelector("#participantsPanel").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;currentJoinData=null;busy=false}
 async function copyLink(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);try{await navigator.clipboard.writeText(u);alert("Lien copié.");}catch(e){const ta=document.createElement("textarea");ta.value=u;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("Lien copié.")}}
 function showQr(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);const w=window.open("","_blank","noopener");if(w){w.document.write("<title>QR RUUNION DIRECT</title><div style="font-family:Arial;text-align:center;padding:30px"><h2>Scanner pour rejoindre</h2><div id="q"></div><p>"+esc(currentCode)+"</p></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById("q"),"+JSON.stringify(u)+")<\/script>")}}
@@ -223,7 +229,7 @@ function renderHistory(){
 function joinCode(c){document.querySelector("#joinCode").value=c;join()}
 function clearHistory(){put(histKey,[]);renderHistory()}
 function esc(s){return String(s).replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[x]))}
-loadProfile();if(!android&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission().catch(()=>{});get(key).filter(m=>new Date(m.date)>new Date()).forEach(scheduleNative);render();renderHistory();
+loadProfile();checkServer();if(!android&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission().catch(()=>{});get(key).filter(m=>new Date(m.date)>new Date()).forEach(scheduleNative);render();renderHistory();
 </script>
 </body>
 </html>
