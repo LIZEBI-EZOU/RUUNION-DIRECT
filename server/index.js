@@ -33,6 +33,8 @@ async function dailyRequest(method,path,body){
  return data;
 }
 async function daily(path,body){return dailyRequest("POST",path,body)}
+let dailyReady=false;
+async function verifyDaily(){try{await dailyRequest("GET","/");dailyReady=true;console.log("Daily connectivity check: OK",DAILY_DOMAIN)}catch(e){dailyReady=false;console.error("Daily connectivity check failed:",{status:e.status||0,code:e.dailyCode||"",message:e.message||""})}}
 async function createRoom(code,title){
  const roomName="ruunion-"+safe(code,40).toLowerCase();
  const exp=Math.floor(Date.now()/1000)+24*60*60;
@@ -57,7 +59,7 @@ async function createToken(roomName,name,email,exp,moderator){
 async function handle(req,res){
  const origin=req.headers.origin||"";
  if(req.method==="OPTIONS"){for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.statusCode=204;return res.end()}
- if(req.method==="GET"&&req.url==="/health")return json(res,200,{ok:true,service:"RUUNION DIRECT Daily API",domain:DAILY_DOMAIN},origin);
+ if(req.method==="GET"&&req.url==="/health")return json(res,dailyReady?200:503,{ok:dailyReady,service:"RUUNION DIRECT Daily API",domain:DAILY_DOMAIN,daily:dailyReady?"reachable":"unreachable"},origin);
  if(req.method==="GET"&&(req.url==="/"||req.url.startsWith("/index.html"))){try{const html=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/index.html"),"utf8");for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","text/html; charset=utf-8");res.statusCode=200;return res.end(html)}catch(e){return json(res,500,{error:"web_unavailable"},origin)}}
  if(req.method==="GET"&&req.url==="/manifest.webmanifest"){try{const x=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/manifest.webmanifest"));for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","application/manifest+json");res.statusCode=200;return res.end(x)}catch(e){return json(res,404,{error:"not_found"},origin)}}
  if(req.method==="GET"&&req.url==="/sw.js"){try{const x=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/sw.js"));for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","application/javascript");res.statusCode=200;return res.end(x)}catch(e){return json(res,404,{error:"not_found"},origin)}}
@@ -80,4 +82,4 @@ async function handle(req,res){
   return json(res,502,{error:"daily_error",message},origin)
  }
 }
-http.createServer((req,res)=>handle(req,res).catch(()=>json(res,500,{error:"server_error",message:"Erreur interne."},req.headers.origin||""))).listen(PORT,"0.0.0.0",()=>console.log("RUUNION DIRECT Daily API listening on "+PORT));
+http.createServer((req,res)=>handle(req,res).catch(()=>json(res,500,{error:"server_error",message:"Erreur interne."},req.headers.origin||""))).listen(PORT,"0.0.0.0",()=>{console.log("RUUNION DIRECT Daily API listening on "+PORT);verifyDaily();});
