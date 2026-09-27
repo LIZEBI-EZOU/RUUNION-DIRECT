@@ -28,16 +28,7 @@ jobs:
           KEYSTORE_B64: ${{ secrets.RUUNION_KEYSTORE_B64 }}
         run: |
           echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/ruunion-release.jks"
-          keytool -list -keystore "$RUNNER_TEMP/ruunion-release.jks" -storepass "${{ secrets.RUUNION_KEYSTORE_PASSWORD }}" >/dev/null
-      - name: Build unsigned release
-        run: gradle --no-daemon :app:assembleRelease
-      - name: Sign release with permanent key
-        env:
-          KS: ${{ runner.temp }}/ruunion-release.jks
-          KSP: ${{ secrets.RUUNION_KEYSTORE_PASSWORD }}
-          KA: ${{ secrets.RUUNION_KEY_ALIAS }}
-          KP: ${{ secrets.RUUNION_KEY_PASSWORD }}
-        run: |
+          keytool -list -keystore 
           $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks "$KS" --ks-pass env:KSP --ks-key-alias "$KA" --key-pass env:KP --out app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-release-unsigned.apk
           $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
       - uses: actions/upload-artifact@v4
