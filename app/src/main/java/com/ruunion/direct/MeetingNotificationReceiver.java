@@ -1,0 +1,7 @@
+package com.ruunion.direct;
+import android.app.*;import android.content.*;import android.os.Build;
+public class MeetingNotificationReceiver extends BroadcastReceiver{
+ private static final String CHANNEL="meetings";
+ @Override public void onReceive(Context context,Intent intent){NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);if(Build.VERSION.SDK_INT>=26){NotificationChannel c=new NotificationChannel(CHANNEL,"Réunions RUUNION DIRECT",NotificationManager.IMPORTANCE_HIGH);c.setDescription("Rappels des réunions programmées");nm.createNotificationChannel(c);}
+ String title=intent.getStringExtra("title"),code=intent.getStringExtra("code");Intent open=context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());PendingIntent pi=PendingIntent.getActivity(context,Math.abs((code==null?"":code).hashCode()),open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,CHANNEL):new Notification.Builder(context);b.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(title==null?"Réunion RUUNION DIRECT":title).setContentText("Votre réunion est programmée — code : "+(code==null?"":code)).setAutoCancel(true).setContentIntent(pi);nm.notify(Math.abs((code==null?"":code).hashCode()),b.build());}
+}
