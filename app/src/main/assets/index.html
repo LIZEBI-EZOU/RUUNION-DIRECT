@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RUUNION DIRECT</title>
 <script src="https://unpkg.com/@daily-co/daily-js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f5f9ff;color:#12304f;font-family:Arial,sans-serif}
 main{max-width:820px;margin:auto;padding:24px 16px 70px}h1{margin:0 0 8px;color:#0b4ea2}.sub{color:#5d7187}
@@ -20,6 +21,15 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 #leave,#share{position:absolute;z-index:11;top:14px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0}
 #leave{left:14px}#share{right:14px}
 #roleBadge{display:inline-block;margin:0 0 10px;padding:6px 9px;border-radius:999px;background:#eef6ff;color:#0b4ea2;font-size:12px;font-weight:700;position:absolute;z-index:11;left:120px;top:14px}
+#netBadge{position:absolute;z-index:11;right:14px;top:58px;padding:6px 9px;border-radius:999px;background:#effaf3;color:#1e6b35;font-size:11px;font-weight:700}
+#preflight{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:30;align-items:center;justify-content:center;padding:18px}
+#preflight .box,#errorBox .box{width:min(560px,100%);background:#fff;border-radius:18px;padding:20px;box-shadow:0 15px 45px rgba(0,0,0,.25)}
+.test{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #e3edf8}.pill{padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}
+#preview{width:100%;aspect-ratio:16/9;background:#071a2e;border-radius:12px;margin:10px 0;object-fit:cover}
+#errorBox{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:40;align-items:center;justify-content:center;padding:18px}
+#participantsPanel{position:absolute;z-index:12;right:14px;bottom:18px;width:min(330px,calc(100% - 28px));max-height:45vh;overflow:auto;background:rgba(255,255,255,.97);color:#12304f;border-radius:14px;padding:12px;display:none;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.participant{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #e3edf8;font-size:13px}
+@media(max-width:600px){#roleBadge{left:95px;font-size:11px}}
 @media(max-width:600px){.row{grid-template-columns:1fr}.meet{align-items:flex-start;flex-direction:column}#roleBadge{left:95px;font-size:11px}}
 </style>
 </head>
@@ -79,15 +89,28 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 
 <div id="call">
 <div id="daily"></div>
+<div id="netBadge">● Réseau OK</div>
+<div id="participantsPanel"><b>Participants</b><div id="participantsList"></div></div>
 <span id="roleBadge">Connexion…</span>
 <button id="leave" onclick="closeCall()">← Quitter</button>
 <button id="share" onclick="share()">Inviter</button>
+<button onclick="copyLink()" style="position:absolute;z-index:11;right:14px;top:14px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Copier le lien</button>
+<button onclick="showQr()" style="position:absolute;z-index:11;right:14px;top:148px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">QR code</button>
+<button id="people" onclick="toggleParticipants()" style="position:absolute;z-index:11;right:14px;top:100px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Participants</button>
 </div>
-
+<div id="preflight"><div class="box">
+<h2>Préparer votre réunion</h2><p class="small">Vérifiez votre caméra et votre microphone avant d’entrer.</p>
+<video id="preview" autoplay muted playsinline></video>
+<div class="test"><span>Caméra</span><span id="camStatus" class="pill warn">Test…</span></div>
+<div class="test"><span>Microphone</span><span id="micStatus" class="pill warn">Test…</span></div>
+<div id="preflightMessage" class="notice">Autorisez la caméra et le microphone pour continuer.</div>
+<div class="row"><button class="muted" onclick="cancelPreflight()">Annuler</button><button onclick="confirmPreflight()">Continuer</button></div>
+</div></div>
+<div id="errorBox"><div class="box"><h2>Connexion interrompue</h2><p id="errorText" class="small">La connexion à la réunion a été interrompue.</p><div class="row"><button class="muted" onclick="closeError()">Fermer</button><button onclick="retryCall()">Réessayer</button></div></div></div>
 <script>
 const API_ENDPOINT="https://ruunion-direct-api.onrender.com/meeting";
 const DAILY_DOMAIN="ezouservicesmeeting.daily.co";
-let callFrame=null,currentRoom="",currentUrl="",currentTitle="",currentCode="",currentModerator=false;
+let callFrame=null,currentRoom="",currentUrl="",currentTitle="",currentCode="",currentModerator=false,currentJoinData=null,pendingJoin=null,preflightStream=null,reconnectTimer=null;
 const key="ruunion-meetings-v4",histKey="ruunion-history-v4",profileKey="ruunion-profile-v1";
 const words=["lac","pin","baie","val","mont","iris","cap","dune","anse","col"];
 
@@ -113,7 +136,7 @@ async function createMeeting(asModerator,forcedCode){
   const data=await res.json().catch(()=>({}));
   if(!res.ok||!data.url)throw new Error(data.message||"Le serveur de réunion n'est pas disponible.");
   notice.className="notice success";notice.textContent="Réunion prête. Connexion directe…";
-  openDaily(data,c,title,asModerator);
+  await prepareAndOpen(data,c,title,asModerator);
   addHistory(title,c);
  }catch(e){
   notice.className="notice warn";notice.textContent="Impossible de démarrer la réunion pour le moment. Vérifiez la connexion au service Daily.";
@@ -128,9 +151,19 @@ async function join(){
  try{
   const res=await fetch(API_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:c,name:p.name,email:p.email,moderator:false,title:"RUUNION DIRECT"})});
   const data=await res.json().catch(()=>({}));if(!res.ok||!data.url)throw new Error(data.message||"Réunion introuvable.");
-  openDaily(data,c,data.title||"RUUNION DIRECT",false);addHistory(data.title||"RUUNION DIRECT",c);
+  await prepareAndOpen(data,c,data.title||"RUUNION DIRECT",false);addHistory(data.title||"RUUNION DIRECT",c);
  }catch(e){notice.className="notice warn";notice.textContent="Réunion introuvable ou service indisponible.";alert("RUUNION DIRECT : "+e.message)}
 }
+async function prepareAndOpen(data,c,title,moderator){
+ currentJoinData={data,c,title,moderator};
+ if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){openDaily(data,c,title,moderator);return;}
+ document.querySelector("#preflight").style.display="flex";
+ document.querySelector("#preflightMessage").className="notice";document.querySelector("#preflightMessage").textContent="Test de la caméra et du microphone…";
+ try{preflightStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});document.querySelector("#preview").srcObject=preflightStream;document.querySelector("#camStatus").textContent="✓ OK";document.querySelector("#camStatus").className="pill success";document.querySelector("#micStatus").textContent="✓ OK";document.querySelector("#micStatus").className="pill success";document.querySelector("#preflightMessage").className="notice success";document.querySelector("#preflightMessage").textContent="Tout est prêt. Vous pouvez entrer dans la réunion.";}catch(e){document.querySelector("#camStatus").textContent="À vérifier";document.querySelector("#micStatus").textContent="À vérifier";document.querySelector("#preflightMessage").className="notice warn";document.querySelector("#preflightMessage").textContent="Caméra/micro non disponibles ou permission refusée. Vous pouvez continuer et les activer dans Daily."}
+}
+function stopPreflight(){if(preflightStream){preflightStream.getTracks().forEach(t=>t.stop());preflightStream=null}const v=document.querySelector("#preview");if(v)v.srcObject=null}
+function cancelPreflight(){stopPreflight();document.querySelector("#preflight").style.display="none";currentJoinData=null}
+function confirmPreflight(){const j=currentJoinData;if(!j)return;stopPreflight();document.querySelector("#preflight").style.display="none";openDaily(j.data,j.c,j.title,j.moderator)}
 function openDaily(data,c,title,moderator){
  currentRoom=data.roomName;currentUrl=data.url;currentCode=c;currentTitle=title;currentModerator=!!moderator;
  document.querySelector("#call").style.display="block";document.querySelector("#daily").innerHTML="";
@@ -143,12 +176,23 @@ function openDaily(data,c,title,moderator){
   const joinOpts={url:data.url,showLocalVideo:true,showParticipantsBar:true,iframeStyle:{width:"100%",height:"100%"}};
   if(data.token)joinOpts.token=data.token;
   callFrame.on("joined-meeting",()=>{document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur actif":"Participant";document.querySelector("#roleBadge").className=moderator?"success":"";});
-  callFrame.on("error",(e)=>{document.querySelector("#roleBadge").textContent="Erreur de connexion";document.querySelector("#roleBadge").className="warn";console.error("Daily error",e)});
-  callFrame.join(joinOpts).catch(e=>{document.querySelector("#roleBadge").textContent="Connexion impossible";document.querySelector("#roleBadge").className="warn";alert("Connexion Daily impossible : "+e.message)});
+  callFrame.on("participant-joined",refreshParticipants);callFrame.on("participant-left",refreshParticipants);callFrame.on("participant-updated",refreshParticipants);
+  callFrame.on("error",(e)=>{document.querySelector("#roleBadge").textContent="Connexion interrompue";document.querySelector("#roleBadge").className="warn";showError("La connexion Daily a été interrompue. Vérifiez votre réseau puis réessayez.");console.error("Daily error",e)});
+  callFrame.join(joinOpts).catch(e=>{document.querySelector("#roleBadge").textContent="Connexion impossible";document.querySelector("#roleBadge").className="warn";showError("Daily n’a pas pu établir la connexion : "+(e.message||"erreur inconnue"))});
   setTimeout(()=>{try{callFrame.setLocalAudio(!muted);callFrame.setLocalVideo(!muted)}catch(e){}},1200);
  }catch(e){document.querySelector("#roleBadge").textContent="Daily indisponible";document.querySelector("#roleBadge").className="warn";alert("Daily ne peut pas être chargé dans cette version.");}
 }
-function closeCall(){if(callFrame){try{callFrame.leave()}catch(e){}try{callFrame.destroy()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;busy=false}
+async function refreshParticipants(){if(!callFrame)return;try{const p=callFrame.participants();const list=document.querySelector("#participantsList");const all=Object.values(p||{});list.innerHTML=all.length?all.map(x=>{const owner=x.owner?" ⭐":"";return "<div class=participant><span>"+esc(x.user_name||"Participant")+owner+"</span><span>"+(x.local?"Vous":"")+"</span></div>"}).join(""):"<p class=small>Aucun participant.</p>"}catch(e){}}
+function toggleParticipants(){const p=document.querySelector("#participantsPanel");p.style.display=p.style.display==="block"?"none":"block";if(p.style.display==="block")refreshParticipants()}
+function setNetwork(ok){const n=document.querySelector("#netBadge");n.textContent=ok?"● Réseau OK":"● Réseau interrompu";n.className=ok?"":"warn"}
+function showError(t){document.querySelector("#errorText").textContent=t;document.querySelector("#errorBox").style.display="flex"}
+function closeError(){document.querySelector("#errorBox").style.display="none"}
+async function retryCall(){closeError();if(!currentJoinData){return}if(reconnectTimer)clearTimeout(reconnectTimer);reconnectTimer=setTimeout(()=>{if(currentJoinData)openDaily(currentJoinData.data,currentJoinData.c,currentJoinData.title,currentJoinData.moderator)},500)}
+window.addEventListener("offline",()=>{setNetwork(false);if(callFrame)showError("Internet semble indisponible. La reconnexion sera tentée dès le retour du réseau.")});
+window.addEventListener("online",()=>{setNetwork(true);if(callFrame&&currentJoinData)retryCall()});
+async function closeCall(){if(callFrame){try{callFrame.leave()}catch(e){}try{callFrame.destroy()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";document.querySelector("#participantsPanel").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;currentJoinData=null;busy=false}
+async function copyLink(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);try{await navigator.clipboard.writeText(u);alert("Lien copié.");}catch(e){const ta=document.createElement("textarea");ta.value=u;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("Lien copié.")}}
+function showQr(){const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);const w=window.open("","_blank","noopener");if(w){w.document.write("<title>QR RUUNION DIRECT</title><div style="font-family:Arial;text-align:center;padding:30px"><h2>Scanner pour rejoindre</h2><div id="q"></div><p>"+esc(currentCode)+"</p></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById("q"),"+JSON.stringify(u)+")<\/script>")}}
 function share(){
  const u=currentUrl||("https://"+DAILY_DOMAIN+"/"+currentRoom);
  const t="Rejoins-moi sur RUUNION DIRECT : "+u+"\nCode : "+currentCode;
