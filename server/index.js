@@ -6,10 +6,11 @@ const DAILY_API_KEY=process.env.DAILY_API_KEY||"";
 const DAILY_DOMAIN=process.env.DAILY_DOMAIN||"ezouservicesmeeting.daily.co";
 const ALLOWED_ORIGINS=(process.env.ALLOWED_ORIGINS||"*").split(",").map(s=>s.trim()).filter(Boolean);
 const rate=new Map();
+setInterval(()=>{const cutoff=Date.now()-60000;for(const [k,v] of rate)if(v.start<cutoff)rate.delete(k)},60000).unref?.();
 
 function cors(origin){
  const allow=ALLOWED_ORIGINS.includes("*")||ALLOWED_ORIGINS.includes(origin)?(ALLOWED_ORIGINS.includes("*")?"*":origin):ALLOWED_ORIGINS[0]||"*";
- return {"Access-Control-Allow-Origin":allow,"Access-Control-Allow-Methods":"POST,OPTIONS","Access-Control-Allow-Headers":"Content-Type","Vary":"Origin"};
+ return {"Access-Control-Allow-Origin":allow,"Access-Control-Allow-Methods":"GET,POST,OPTIONS","Access-Control-Allow-Headers":"Content-Type","Vary":"Origin"};
 }
 function json(res,status,data,origin){
  for(const [k,v] of Object.entries(cors(origin)))res.setHeader(k,v);
