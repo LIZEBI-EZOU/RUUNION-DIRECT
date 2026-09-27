@@ -26,14 +26,19 @@ function safe(s,max=80){return String(s||"").trim().replace(/[^a-zA-Z0-9_-]/g,"-
 async function daily(path,body){
  const r=await fetch("https://api.daily.co/v1"+path,{method:"POST",headers:{"Authorization":"Bearer "+DAILY_API_KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});
  const data=await r.json().catch(()=>({}));
- if(!r.ok)throw new Error(data.info||data.error||"Daily API error");
+ if(!r.ok){const e=new Error(data.info||data.error||"Daily API error");e.status=r.status;throw e}
  return data;
 }
 async function createRoom(code,title){
- const roomName="ruunion-"+safe(code,40)+"-"+crypto.randomBytes(3).toString("hex");
+ const roomName="ruunion-"+safe(code,40).toLowerCase();
  const exp=Math.floor(Date.now()/1000)+24*60*60;
- const data=await daily("/rooms",{name:roomName,privacy:"public",properties:{exp,max_participants:200,enable_prejoin_ui:true,start_video_off:true,start_audio_off:true,enable_screenshare:true,enable_chat:true,enable_noise_cancellation_ui:true,lang:"fr"}});
- return {roomName:data.name||roomName,url:data.url||("https://"+DAILY_DOMAIN+"/"+encodeURIComponent(roomName)),exp};
+ try{
+  const data=await daily("/rooms",{name:roomName,privacy:"public",properties:{exp,max_participants:200,enable_prejoin_ui:true,start_video_off:true,start_audio_off:true,enable_screenshare:true,enable_chat:true,enable_noise_cancellation_ui:true,lang:"fr"}});
+  return {roomName:data.name||roomName,url:data.url||("https://"+DAILY_DOMAIN+"/"+encodeURIComponent(roomName)),exp};
+ }catch(e){
+  if(e.status===409)return {roomName,url:"https://"+DAILY_DOMAIN+"/"+encodeURIComponent(roomName),exp};
+  throw e;
+ }
 }
 async function createToken(roomName,name,email,exp){
  const userId=crypto.createHash("sha256").update((email||name||"guest")+"|"+roomName).digest("hex").slice(0,32);
