@@ -56,18 +56,19 @@ button{border:0;background:#18a957;color:#fff;font-weight:700;cursor:pointer;box
 <div class="card"><h2>Réunions récentes</h2><div id="history"></div><button onclick="clearHistory()">Effacer l'historique</button></div>
 <div id="call">
 <div id="daily"></div>
-<div id="netBadge">● Réseau OK</div>
-<div id="participantsPanel"><b>Participants</b><div id="participantsList"></div></div>
+<div id="callTop"></div>
 <span id="roleBadge">Connexion…</span>
-<button id="leave" onclick="closeCall()">← Quitter</button>
-<button id="share" onclick="share()">Inviter</button>
-<button onclick="copyLink()" style="position:absolute;z-index:11;right:14px;top:14px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Copier le lien</button>
-<button onclick="showQr()" style="position:absolute;z-index:11;right:14px;top:148px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">QR code</button>
-<button onclick="showMeetingTools()" style="position:absolute;z-index:11;right:14px;top:196px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Outils</button>
-<button id="people" onclick="toggleParticipants()" style="position:absolute;z-in<div id="call"><div id="daily"></div><div id="callTop"></div><span id="roleBadge">Connexion…</span><div id="netBadge">● Réseau OK</div>
+<div id="netBadge">● Réseau OK · 0/100</div>
 <button id="leave" class="top-button" onclick="closeCall()">← Quitter</button>
-<div id="meetingBottomBar"><button onclick="toggleParticipants()">Participants</button><button onclick="share()">Inviter</button><button onclick="copyLink()">Copier</button><button onclick="showQr()">QR</button><button onclick="showMeetingTools()">Outils</button></div>
-<div id="participantsPanel"><b>Participants</b><div id="participantsList"></div></div></div><div id="identityModal" class="modal"><div class="box"><h2>Identifiant de réunion</h2><label>Votre nom</label><input id="modalName" placeholder="Votre nom"><label>Votre adresse e-mail</label><input id="modalEmail" type="email" placeholder="nom@exemple.com"><div class="row"><button onclick="saveIdentityFromModal()">Enregistrer</button><button class="top-button" onclick="closeModal('identityModal')">Fermer</button></div></div></div>
+<div id="meetingBottomBar">
+<button onclick="toggleParticipants()">Participants</button>
+<button onclick="share()">Inviter</button>
+<button onclick="copyLink()">Copier</button>
+<button onclick="showQr()">QR</button>
+<button onclick="showMeetingTools()">Outils</button>
+</div>
+<div id="participantsPanel"><b>Participants</b><div id="participantsList"></div></div>
+</div><div id="identityModal" class="modal"><div class="box"><h2>Identifiant de réunion</h2><label>Votre nom</label><input id="modalName" placeholder="Votre nom"><label>Votre adresse e-mail</label><input id="modalEmail" type="email" placeholder="nom@exemple.com"><div class="row"><button onclick="saveIdentityFromModal()">Enregistrer</button><button class="top-button" onclick="closeModal('identityModal')">Fermer</button></div></div></div>
 <div id="instantModal" class="modal"><div class="box"><h2>Réunion instantanée</h2><label>Nom de la réunion</label><input id="modalTitle" placeholder="RÉUNION DIRECT"><div class="row"><button onclick="closeModal('instantModal');instant(true)">Modérateur</button><button onclick="closeModal('instantModal');instant(false)">Participant</button></div><button class="top-button" onclick="closeModal('instantModal')">Annuler</button></div></div>
 <div id="connectionModal" class="modal"><div class="box"><h2>Connexion</h2><div class="row"><button onclick="openBrowser()">🌐 Navigateur</button><button onclick="openAppHint()">📱 Application Android</button></div><div id="browserNotice" class="notice">Prêt à vous connecter.</div><button class="top-button" onclick="closeModal('connectionModal')">Fermer</button></div></div>
 <div id="joinModal" class="modal"><div class="box"><h2>Rejoindre directement</h2><label>Code ou nom</label><input id="joinCode" placeholder="lac-42x"><label>Lien JaaS</label><input id="joinLink" placeholder="https://8x8.vc/..."><button onclick="closeModal('joinModal');join()">Rejoindre sans mot de passe</button><button class="top-button" onclick="closeModal('joinModal')">Fermer</button></div></div>
