@@ -6,100 +6,54 @@
 <title>RÉUNION DIRECT</title>
 <script src="https://8x8.vc/vpaas-magic-cookie-b2b67b10aa9c47f3a51b4ec37ad2194d/external_api.js"></script>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b4ea2"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f5f9ff;color:#12304f;font-family:Arial,sans-serif}
-main{max-width:820px;margin:auto;padding:24px 16px 70px}h1{margin:0 0 8px;color:#0b4ea2}.sub{color:#5d7187}
-.card{background:#fff;border:1px solid #d7e5f5;border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 5px 18px rgba(11,78,162,.07)}
+<style>*{box-sizing:border-box}body{margin:0;background:#f5f9ff;color:#12304f;font-family:Arial,sans-serif}
+main{max-width:900px;margin:auto;padding:16px 14px 92px}h1{margin:0;color:#0b4ea2;font-size:24px}.sub{color:#5d7187;margin:4px 0 14px}
+.card{background:#fff;border:1px solid #d7e5f5;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 5px 18px rgba(11,78,162,.07)}
+.card h2{font-size:17px;margin:0 0 6px;color:#0b4ea2}.section-title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#6a7f94;margin:18px 2px 7px}
+.table-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.table-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.table-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.action-card{min-height:112px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,#fff,#f8fbff);border:1px solid #d7e5f5;border-radius:15px;padding:14px}
+.action-card h3{margin:0 0 5px;font-size:15px;color:#12304f}.action-card p{margin:0 0 12px;font-size:12px;color:#6a7f94;line-height:1.35}
 input,button{font:inherit;border-radius:10px;padding:11px}input{width:100%;background:#fff;color:#12304f;border:1px solid #b9cee5;margin:6px 0 12px}
-button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.muted{background:#fff;color:#1769e0;border:1px solid #1769e0}.danger{background:#b42318}
+button{border:0;background:#18a957;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 3px 9px rgba(24,169,87,.18)}button:hover{background:#138f49}.danger{background:#b42318}.top-button{background:#fff;color:#0b4ea2;border:1px solid #0b4ea2;box-shadow:none}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.meet{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid #e3edf8;padding:12px 0}
-.code{color:#0b4ea2;font-family:monospace;font-weight:700}.small{font-size:13px;color:#6a7f94}.brand{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.logo{width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 3px 12px rgba(11,78,162,.18)}
+.code{color:#0b4ea2;font-family:monospace;font-weight:700}.small{font-size:13px;color:#6a7f94}.brand{display:flex;align-items:center;gap:12px;margin-bottom:10px}.logo{width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 3px 12px rgba(11,78,162,.18)}
 .brand-title{display:flex;flex-direction:column}.brand-title strong{color:#0b4ea2;font-size:20px}.brand-title span{font-size:12px;color:#6a7f94}
 .notice{padding:12px;border-radius:12px;background:#eef6ff;border:1px solid #cfe3fa;color:#174b7a;margin-top:12px}.success{background:#effaf3;border-color:#b8e1c5;color:#1e6b35}.warn{background:#fff8e8;border-color:#f2d38b;color:#7b5b0b}
+.modal{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:60;align-items:center;justify-content:center;padding:18px}.modal .box{width:min(620px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 15px 45px rgba(0,0,0,.25)}
 #call{display:none;position:fixed;inset:0;background:#071a2e;z-index:10}#jitsi{position:absolute;inset:0}
-#leave,#share{position:absolute;z-index:11;top:14px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0}
-#leave{left:14px}#share{right:14px}
-#roleBadge{display:inline-block;margin:0 0 10px;padding:6px 9px;border-radius:999px;background:#eef6ff;color:#0b4ea2;font-size:12px;font-weight:700;position:absolute;z-index:11;left:120px;top:14px}
-#netBadge{position:absolute;z-index:11;right:14px;top:58px;padding:6px 9px;border-radius:999px;background:#effaf3;color:#1e6b35;font-size:11px;font-weight:700}
-#preflight{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:30;align-items:center;justify-content:center;padding:18px}
-#preflight .box,#errorBox .box{width:min(560px,100%);background:#fff;border-radius:18px;padding:20px;box-shadow:0 15px 45px rgba(0,0,0,.25)}
+#leave{position:absolute;z-index:20;left:12px;top:12px;padding:9px 14px;background:#fff;color:#0b4ea2;border:1px solid #0b4ea2;box-shadow:none}
+#callTop{position:absolute;z-index:19;left:0;right:0;top:0;height:58px;pointer-events:none;background:linear-gradient(180deg,rgba(7,26,46,.62),transparent)}
+#roleBadge{display:inline-block;padding:6px 9px;border-radius:999px;background:#eef6ff;color:#0b4ea2;font-size:12px;font-weight:700;position:absolute;z-index:21;left:118px;top:14px}
+#netBadge{position:absolute;z-index:21;right:14px;top:14px;padding:6px 9px;border-radius:999px;background:#effaf3;color:#1e6b35;font-size:11px;font-weight:700}
+#meetingBottomBar{position:absolute;z-index:22;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:9px 10px;background:rgba(7,26,46,.9);border:1px solid rgba(255,255,255,.14);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#meetingBottomBar button{min-width:74px;padding:9px 10px;font-size:12px}
+#participantsPanel{position:absolute;z-index:23;right:14px;bottom:78px;width:min(330px,calc(100% - 28px));max-height:45vh;overflow:auto;background:rgba(255,255,255,.97);color:#12304f;border-radius:14px;padding:12px;display:none;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.participant{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #e3edf8;font-size:13px}
+#preflight{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:70;align-items:center;justify-content:center;padding:18px}#preflight .box,#errorBox .box{width:min(560px,100%);background:#fff;border-radius:18px;padding:20px;box-shadow:0 15px 45px rgba(0,0,0,.25)}
 .test{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #e3edf8}.pill{padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}
 #preview{width:100%;aspect-ratio:16/9;background:#071a2e;border-radius:12px;margin:10px 0;object-fit:cover}
-#errorBox{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:40;align-items:center;justify-content:center;padding:18px}
-#participantsPanel{position:absolute;z-index:12;right:14px;bottom:18px;width:min(330px,calc(100% - 28px));max-height:45vh;overflow:auto;background:rgba(255,255,255,.97);color:#12304f;border-radius:14px;padding:12px;display:none;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.participant{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #e3edf8;font-size:13px}
-@media(max-width:600px){#roleBadge{left:95px;font-size:11px}}
-@media(max-width:600px){.row{grid-template-columns:1fr}.meet{align-items:flex-start;flex-direction:column}#roleBadge{left:95px;font-size:11px}}
-</style>
+#errorBox{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:80;align-items:center;justify-content:center;padding:18px}
+@media(max-width:720px){.table-grid.three{grid-template-columns:1fr}.table-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.table-grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}#meetingBottomBar{left:8px;right:8px;transform:none;justify-content:space-between;gap:5px}#meetingBottomBar button{min-width:0;flex:1;padding:9px 6px}#roleBadge{left:104px;font-size:11px}}</style>
 </head>
 <body>
 <main>
 <div class="brand"><img class="logo" src="ruunion-logo.png" alt="RÉUNION DIRECT"><div class="brand-title"><strong>RÉUNION DIRECT</strong><span>Réunions vidéo simples et directes</span></div></div>
-<h1>RÉUNION DIRECT</h1>
-<p class="sub">Une même réunion depuis le navigateur ou l'application Android.</p>
-
-<div class="card">
-<h2>Identité de réunion</h2>
-<div class="row">
-<div><label for="name">Votre nom</label><input id="name" placeholder="Votre nom"></div>
-<div><label for="email">Votre adresse e-mail</label><input id="email" type="email" value="ezouservices@gmail.com" autocomplete="email"></div>
-</div>
-<p class="small">Votre identité est envoyée au service de réunion uniquement pour afficher votre nom.</p>
-</div>
-
-<div class="card"><h2>Connexion</h2><p class="small">Choisissez où participer à RÉUNION DIRECT.</p><div class="row"><button onclick="openBrowser()">🌐 Ouvrir dans le navigateur</button><button class="muted" onclick="openAppHint()">📱 Utiliser l’application Android</button></div><div id="browserNotice" class="notice">Le navigateur utilise les mêmes codes de réunion et le même service Jitsi que l’application.</div></div>
-
-<div class="card">
-<h2>Réunion instantanée</h2>
-<div><label for="title">Nom de la réunion</label><input id="title" placeholder="RÉUNION DIRECT"></div>
-<div class="row">
-<button onclick="instant(true)">Démarrer la réunion (modérateur)</button>
-<button class="muted" onclick="instant(false)">Démarrer comme participant</button>
-</div>
-<div id="startNotice" class="notice success">Jitsi Meet est utilisé directement. Le bouton de démarrage ouvre automatiquement la salle.</div>
-</div>
-
-<div class="card">
-<h2>Rejoindre directement</h2>
-<input id="joinCode" placeholder="Code ou nom de réunion (ex. lac-42x)">
-<input id="joinLink" placeholder="Ou collez directement le lien de la réunion">
-<button class="muted" onclick="join()">Rejoindre sans mot de passe</button>
-<p class="small">Aucun compte ni mot de passe n’est demandé au participant. Le lien de réunion peut être utilisé directement.</p>
-</div>
-
-<div class="card">
-<h2>Programmer une réunion</h2>
-<input id="schedTitle" placeholder="Titre de la réunion">
-<input id="schedDate" type="datetime-local">
-<button onclick="schedule()">Programmer et rappeler</button>
-<div id="list"></div>
-</div>
-
-<div class="card"><h2>Réunions récentes</h2><div id="history"></div><button class="muted" onclick="clearHistory()">Effacer l'historique</button></div>
-<div class="card"><h2>Tableau de bord</h2><p class="small">Suivez les réunions ouvertes depuis cet appareil : participants, durée et qualité réseau.</p><button class="muted" onclick="showDashboard()">Ouvrir le tableau de bord</button></div>
-
-<div class="card"><h2>Options</h2><button class="muted" onclick="openOptions()">⚙️ Ouvrir les options</button></div>
-
-<div class="card">
-<h2>Fonctions avancées Jitsi</h2>
-<div class="row">
-<button class="muted" onclick="startRecording()">Enregistrer</button>
-<button class="muted" onclick="stopRecording()">Arrêter l’enregistrement</button>
-</div>
-<div class="row">
-<button class="muted" onclick="toggleScreenShare()">Partager l’écran</button>
-<button class="muted" onclick="toggleTranscription()">Transcription / sous-titres</button>
-</div>
-<p class="small">Les fonctions disponibles dépendent de Jitsi et de la configuration de la salle.</p>
-</div>
-
-<div class="card">
-<h2>Service de réunion</h2>
-<p class="small">Réunions vidéo sécurisées par JaaS sur <b>8x8.vc</b>. Aucun compte RÉUNION DIRECT n’est requis.</p>
-</div>
-</main>
-
+<h1>RÉUNION DIRECT</h1><p class="sub">Une même réunion depuis le navigateur ou l'application Android.</p>
+<div class="section-title">1 · Démarrage</div><div class="table-grid">
+<div class="action-card"><div><h3>Identifiant de réunion</h3><p>Définissez votre identité de participation.</p></div><button onclick="openModal('identityModal')">Ouvrir</button></div>
+<div class="action-card"><div><h3>Réunion instantanée</h3><p>Créez immédiatement une salle JaaS.</p></div><button onclick="openModal('instantModal')">Démarrer</button></div></div>
+<div class="card" id="homeFields"><h2>Tableau d'accueil</h2><div class="row"><div><label for="name">Votre nom</label><input id="name" placeholder="Votre nom"></div><div><label for="email">Votre adresse e-mail</label><input id="email" type="email" autocomplete="email"></div></div><p class="small">Les fenêtres d'action complètent automatiquement ces champs.</p></div>
+<div class="section-title">2 · Accès à la réunion</div><div class="table-grid three">
+<div class="action-card"><div><h3>Connexion</h3><p>Navigateur ou application Android.</p></div><button onclick="openModal('connectionModal')">Connexion</button></div>
+<div class="action-card"><div><h3>Rejoindre directement</h3><p>Code ou lien JaaS, sans mot de passe.</p></div><button onclick="openModal('joinModal')">Rejoindre</button></div>
+<div class="action-card"><div><h3>Programmer une réunion</h3><p>Planifiez une réunion et son rappel.</p></div><button onclick="openModal('scheduleModal')">Programmer</button></div></div>
+<div class="section-title">3 · Gestion et services</div><div class="table-grid four">
+<div class="action-card"><div><h3>Programmer une réunion</h3><p>Accès rapide au planificateur complet.</p></div><button onclick="openModal('scheduleModal')">Ouvrir</button></div>
+<div class="action-card"><div><h3>Tableau de bord</h3><p>Historique, durée et données.</p></div><button onclick="showDashboard()">Ouvrir</button></div>
+<div class="action-card"><div><h3>Fonctionnalités avancées Jitsi</h3><p>Outils disponibles selon la salle.</p></div><button onclick="openModal('advancedModal')">Ouvrir</button></div>
+<div class="action-card"><div><h3>Service de réunion</h3><p>État du service JaaS 8x8.vc.</p></div><button onclick="openModal('serviceModal')">Ouvrir</button></div></div>
+<div class="card"><h2>Réunions récentes</h2><div id="history"></div><button onclick="clearHistory()">Effacer l'historique</button></div>
 <div id="call">
 <div id="daily"></div>
 <div id="netBadge">● Réseau OK</div>
@@ -110,10 +64,17 @@ button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer}.mu
 <button onclick="copyLink()" style="position:absolute;z-index:11;right:14px;top:14px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Copier le lien</button>
 <button onclick="showQr()" style="position:absolute;z-index:11;right:14px;top:148px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">QR code</button>
 <button onclick="showMeetingTools()" style="position:absolute;z-index:11;right:14px;top:196px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Outils</button>
-<button id="people" onclick="toggleParticipants()" style="position:absolute;z-index:11;right:14px;top:100px;padding:9px 14px;background:#fff;color:#0b4ea2;border:0">Participants</button>
-</div>
-<div id="optionsBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:59;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(520px,100%);background:#fff;border-radius:18px;padding:20px"><h2>Options facultatives</h2><label><input id="mute" type="checkbox" checked> Arriver micro et caméra coupés</label><br><label><input id="noise" type="checkbox" checked> Suppression du bruit</label><p class="small">Les options vidéo, audio et appareil sont facultatives et peuvent être modifiées avant la réunion.</p><button class="muted" onclick="closeOptions()">Fermer</button></div></div>
-<div id="preflight"><div class="box">
+<button id="people" onclick="toggleParticipants()" style="position:absolute;z-in<div id="call"><div id="daily"></div><div id="callTop"></div><span id="roleBadge">Connexion…</span><div id="netBadge">● Réseau OK</div>
+<button id="leave" class="top-button" onclick="closeCall()">← Quitter</button>
+<div id="meetingBottomBar"><button onclick="toggleParticipants()">Participants</button><button onclick="share()">Inviter</button><button onclick="copyLink()">Copier</button><button onclick="showQr()">QR</button><button onclick="showMeetingTools()">Outils</button></div>
+<div id="participantsPanel"><b>Participants</b><div id="participantsList"></div></div></div><div id="identityModal" class="modal"><div class="box"><h2>Identifiant de réunion</h2><label>Votre nom</label><input id="modalName" placeholder="Votre nom"><label>Votre adresse e-mail</label><input id="modalEmail" type="email" placeholder="nom@exemple.com"><div class="row"><button onclick="saveIdentityFromModal()">Enregistrer</button><button class="top-button" onclick="closeModal('identityModal')">Fermer</button></div></div></div>
+<div id="instantModal" class="modal"><div class="box"><h2>Réunion instantanée</h2><label>Nom de la réunion</label><input id="modalTitle" placeholder="RÉUNION DIRECT"><div class="row"><button onclick="closeModal('instantModal');instant(true)">Modérateur</button><button onclick="closeModal('instantModal');instant(false)">Participant</button></div><button class="top-button" onclick="closeModal('instantModal')">Annuler</button></div></div>
+<div id="connectionModal" class="modal"><div class="box"><h2>Connexion</h2><div class="row"><button onclick="openBrowser()">🌐 Navigateur</button><button onclick="openAppHint()">📱 Application Android</button></div><div id="browserNotice" class="notice">Prêt à vous connecter.</div><button class="top-button" onclick="closeModal('connectionModal')">Fermer</button></div></div>
+<div id="joinModal" class="modal"><div class="box"><h2>Rejoindre directement</h2><label>Code ou nom</label><input id="joinCode" placeholder="lac-42x"><label>Lien JaaS</label><input id="joinLink" placeholder="https://8x8.vc/..."><button onclick="closeModal('joinModal');join()">Rejoindre sans mot de passe</button><button class="top-button" onclick="closeModal('joinModal')">Fermer</button></div></div>
+<div id="scheduleModal" class="modal"><div class="box"><h2>Programmer une réunion</h2><input id="schedTitle" placeholder="Titre de la réunion"><div class="row"><input id="schedDate" type="datetime-local"><input id="schedEnd" type="datetime-local"></div><input id="schedDescription" placeholder="Description"><input id="schedLocation" placeholder="Lieu / salle"><input id="schedAttendees" placeholder="Participants (e-mails séparés par des virgules)"><label><input id="schedVirtual" type="checkbox" checked> Réunion virtuelle</label><p class="small">Fuseau horaire : Africa/Lubumbashi</p><button onclick="schedule()">Créer la réunion JaaS et programmer le rappel</button><div id="list"></div><button class="top-button" onclick="closeModal('scheduleModal')">Fermer</button></div></div>
+<div id="advancedModal" class="modal"><div class="box"><h2>Fonctionnalités avancées Jitsi</h2><div class="row"><button onclick="startRecording()">Enregistrer</button><button onclick="stopRecording()">Arrêter</button></div><div class="row"><button onclick="toggleScreenShare()">Partager l’écran</button><button onclick="toggleTranscription()">Transcription / sous-titres</button></div><button class="top-button" onclick="closeModal('advancedModal')">Fermer</button></div></div>
+<div id="serviceModal" class="modal"><div class="box"><h2>Service de réunion</h2><p class="small">Réunions vidéo par JaaS sur <b>8x8.vc</b>. Aucun compte RÉUNION DIRECT n’est requis.</p><div id="serviceStatus" class="notice">Vérification du service…</div><button onclick="checkServer()">Vérifier le service</button><button class="top-button" onclick="closeModal('serviceModal')">Fermer</button></div></div>
+<div id="optionsBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:59;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(520px,100%);background:#fff;border-radius:18px;padding:20px"><h2>Options facultatives</h2><label><input id="mute" type="checkbox" checked> Arriver micro et caméra coupés</label><br><label><input id="noise" type="checkbox" checked> Suppression du bruit</label><p class="small">Les options vidéo, audio et appareil sont facultatives et peuvent être modifiées avant la réunion.</p><button class="top-button" onclick="closeOptions()">Fermer</button></div></div><div id="preflight"><div class="box">
 <h2>Préparer votre réunion</h2><p class="small">Vérifiez votre caméra et votre microphone avant d’entrer.</p>
 <video id="preview" autoplay muted playsinline></video>
 <div class="test"><span>Caméra</span><span id="camStatus" class="pill warn">Test…</span></div>
@@ -135,7 +96,10 @@ let meetingStartedAt=0,participantSessions={},lastNetworkQuality="unknown",recon
 const key="ruunion-meetings-v4",histKey="ruunion-history-v4",profileKey="ruunion-profile-v1";
 const words=["lac","pin","baie","val","mont","iris","cap","dune","anse","col"];
 const android=typeof AndroidBridge!=="undefined";
-function openBrowser(){const u=(currentUrl||PUBLIC_WEB_URL);if(android&&window.AndroidBridge.openMeetingInBrowser){AndroidBridge.openMeetingInBrowser(u);return;}window.open(u,"_blank");document.querySelector("#browserNotice").textContent="Le navigateur est prêt. Utilisez le code ou le lien pour rejoindre."; }
+function openBrowser(){const u=(currentUrl||PUBLIC_WEB_URL);if(android&&window.AndroidBridge.openMeetingInBrowser){AndroidBridge.openMeetingInBrowser(u);return;}window.open(u,"_blank");const n=document.querySelector("#browserNotice");if(n)n.textContent="Le navigateur est prêt. Utilisez le code ou le lien pour rejoindre.";closeModal("connectionModal")}
+function openModal(id){const m=document.getElementById(id);if(m)m.style.display="flex";if(id==="identityModal"){const p=getProfile();document.getElementById("modalName").value=p.name||document.getElementById("name").value||"";document.getElementById("modalEmail").value=p.email||document.getElementById("email").value||""}if(id==="serviceModal")checkServer()}
+function closeModal(id){const m=document.getElementById(id);if(m)m.style.display="none"}
+function saveIdentityFromModal(){const n=document.getElementById("modalName").value.trim(),e=document.getElementById("modalEmail").value.trim().toLowerCase();if(e&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return alert("Veuillez saisir une adresse e-mail valide.");document.getElementById("name").value=n;document.getElementById("email").value=e;put(profileKey,{name:n,email:e||"guest@ruunion.direct"});closeModal("identityModal")}
 function openAppHint(){document.querySelector("#browserNotice").textContent=android?"Vous utilisez déjà l’application Android.":"Continuez dans le navigateur ou installez l’application Android.";}
 function code(){return words[Math.floor(Math.random()*words.length)]+"-"+Math.random().toString(36).slice(2,6)}
 function get(k){try{return JSON.parse(localStorage.getItem(k)||"[]")}catch(e){return[]}}
@@ -156,7 +120,7 @@ async function requestJaasMeeting(room,title,name,email,moderator){
 }
 async function createMeeting(asModerator,forcedCode){
  if(busy)return; const p=identity();if(!p)return; busy=true;
- const title=document.querySelector("#title").value.trim()||"RÉUNION DIRECT",c=forcedCode||code(),room=roomFromCode(c);
+ const title=document.querySelector("#modalTitle")?.value.trim()||"RÉUNION DIRECT",c=forcedCode||code(),room=roomFromCode(c);
  const notice=document.querySelector("#startNotice");notice.className="notice";notice.textContent="Ouverture de la réunion Jitsi…";
  try{const tokenData=await requestJaasMeeting(room,title,p.name,p.email,asModerator);const data={roomName:tokenData.roomName,url:tokenData.url,title,name:p.name,email:p.email,moderator:asModerator,token:tokenData.token};notice.className="notice success";notice.textContent="Salle JaaS prête. Ouverture sécurisée…";await prepareAndOpen(data,c,title,asModerator);addHistory(title,c);}
  catch(e){notice.className="notice warn";notice.textContent="Impossible d’ouvrir la réunion. Vérifiez Internet puis réessayez.";showError("Jitsi n’a pas pu ouvrir la réunion : "+(e.message||"erreur inconnue"))}
@@ -230,8 +194,8 @@ async function checkServer(){try{const r=await fetch(API_BASE+"/health");const d
 async function closeCall(){saveMeetingMetrics();if(callFrame){try{callFrame.dispose()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";document.querySelector("#participantsPanel").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;currentJoinData=null;busy=false}
 async function copyLink(){const u=currentUrl||roomUrl(currentRoom);try{await navigator.clipboard.writeText(u);alert("Lien copié.")}catch(e){const ta=document.createElement("textarea");ta.value=u;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("Lien copié.")}}
 function share(){const u=currentUrl||roomUrl(currentRoom),t="Rejoins-moi sur RÉUNION DIRECT : "+u+"\nCode : "+currentCode;if(navigator.share)navigator.share({title:"RÉUNION DIRECT",text:t,url:u}).catch(()=>{});else if(android)AndroidBridge.openMeetingInBrowser("https://wa.me/?text="+encodeURIComponent(t));else window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank","noopener")}
-function schedule(){const title=document.querySelector("#schedTitle").value.trim()||"RÉUNION DIRECT",date=document.querySelector("#schedDate").value;if(!date)return alert("Choisissez une date");const when=new Date(date).getTime();if(!Number.isFinite(when)||when<=Date.now())return alert("Choisissez une date future");const m={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),title,date,code:code()};const a=get(key);a.push(m);put(key,a);scheduleNative(m);render();document.querySelector("#schedTitle").value="";document.querySelector("#schedDate").value=""}
-function scheduleNative(m){const when=new Date(m.date).getTime()-10*60*1000;if(!Number.isFinite(when))return;if(android)AndroidBridge.scheduleNotification(m.id,m.title,m.code,Math.max(Date.now()+1000,when));else if("Notification"in window&&Notification.permission==="granted"){const delay=Math.max(0,when-Date.now());if(delay<=2147483647)setTimeout(()=>new Notification(m.title,{body:"Réunion dans 10 minutes — code : "+m.code}),delay)}}
+async function schedule(){const title=document.querySelector("#schedTitle").value.trim()||"RÉUNION DIRECT",date=document.querySelector("#schedDate").value,endTime=document.querySelector("#schedEnd").value;if(!date)return alert("Choisissez une date");const when=new Date(date).getTime();if(!Number.isFinite(when)||when<=Date.now())return alert("Choisissez une date future");if(endTime&&new Date(endTime).getTime()<=when)return alert("L'heure de fin doit être après le début");const p=identity();if(!p)return;const m={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),title,description:document.querySelector("#schedDescription").value.trim(),date,endTime,attendees:document.querySelector("#schedAttendees").value.split(",").map(x=>x.trim()).filter(Boolean),location:document.querySelector("#schedLocation").value.trim(),isVirtual:document.querySelector("#schedVirtual").checked,timeZone:"Africa/Lubumbashi",code:code()};try{const td=await requestJaasMeeting(roomFromCode(m.code),title,p.name,p.email,true);m.roomName=td.roomName;m.url=td.url;const a=get(key);a.push(m);put(key,a);scheduleNative(m);render();closeModal("scheduleModal");alert("Réunion JaaS créée et rappel programmé.")}catch(e){alert("Impossible de créer la réunion JaaS : "+(e.message||"erreur inconnue"))}}
+function scheduleNative(m){const when=new Date(m.date).getTime()-10*60*1000;if(!Number.isFinite(when))return;if(android)AndroidBridge.scheduleNotification(m.id,m.title,m.code,Math.max(Date.now()+1000,when),m.description||"",m.location||"");else if("Notification"in window&&Notification.permission==="granted"){const delay=Math.max(0,when-Date.now());if(delay<=2147483647)setTimeout(()=>new Notification(m.title,{body:"Réunion dans 10 minutes — code : "+m.code}),delay)}}
 function removeMeeting(id){if(android)AndroidBridge.cancelNotification(id);put(key,get(key).filter(x=>x.id!==id));render()}
 function render(){const a=get(key).sort((x,y)=>new Date(x.date)-new Date(y.date)),l=document.querySelector("#list");l.innerHTML=a.length?"":"<p class='small'>Aucune réunion programmée.</p>";a.forEach(m=>{const d=document.createElement("div");d.className="meet";const info=document.createElement("div");info.innerHTML="<b>"+esc(m.title)+"</b><div class='small'>"+new Date(m.date).toLocaleString("fr-FR")+"</div><div class='code'>"+esc(m.code)+"</div>";const actions=document.createElement("div"),j=document.createElement("button");j.textContent="Démarrer";j.onclick=()=>createMeeting(true,m.code);const del=document.createElement("button");del.textContent="Supprimer";del.className="danger";del.style.marginLeft="6px";del.onclick=()=>removeMeeting(m.id);actions.append(j,del);d.append(info,actions);l.appendChild(d)})}
 function addHistory(title,c){const a=get(histKey).filter(x=>x.code!==c);a.unshift({title,code:c,at:Date.now(),duration:0,participants:0,reconnects:0,lastQuality:"unknown"});put(histKey,a.slice(0,50));renderHistory()}
