@@ -48,16 +48,17 @@ async function createToken(roomName,name,email,moderator){
 }
 async function handle(req,res){
  const origin=req.headers.origin||"";
+ const pathname=new URL(req.url||"/","http://127.0.0.1").pathname;
  if(req.method==="OPTIONS"){for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.statusCode=204;return res.end()}
- if(req.method==="GET"&&req.url==="/health"){
+ if(req.method==="GET"&&pathname==="/health"){
   const configured=!!(JAAS_APP_ID&&JAAS_KID&&(JAAS_PRIVATE_KEY_B64||JAAS_PRIVATE_KEY));
   return json(res,configured?200:503,{ok:configured,service:"RUUNION DIRECT JaaS API",domain:JAAS_DOMAIN,jaas:configured?"configured":"not_configured"},origin);
  }
  if(req.method==="GET"&&(req.url==="/"||req.url.startsWith("/index.html"))){try{const html=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/index.html"),"utf8");for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","text/html; charset=utf-8");res.statusCode=200;return res.end(html)}catch(e){return json(res,500,{error:"web_unavailable"},origin)}}
- if(req.method==="GET"&&req.url==="/manifest.webmanifest"){try{const x=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/manifest.webmanifest"));for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","application/manifest+json");res.statusCode=200;return res.end(x)}catch(e){return json(res,404,{error:"not_found"},origin)}}
- if(req.method==="GET"&&req.url==="/sw.js"){try{const x=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/sw.js"));for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","application/javascript");res.statusCode=200;return res.end(x)}catch(e){return json(res,404,{error:"not_found"},origin)}}
- if(req.method==="GET"&&req.url==="/ruunion-logo.png"){try{const x=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/ruunion-logo.png"));for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","image/png");res.statusCode=200;return res.end(x)}catch(e){return json(res,404,{error:"not_found"},origin)}}
- if(req.method!=="POST"||req.url!=="/meeting")return json(res,404,{error:"not_found"},origin);
+ if(req.method==="GET"&&pathname==="/manifest.webmanifest"){try{const x=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/manifest.webmanifest"));for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","application/manifest+json");res.statusCode=200;return res.end(x)}catch(e){return json(res,404,{error:"not_found"},origin)}}
+ if(req.method==="GET"&&pathname==="/sw.js"){try{const x=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/sw.js"));for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","application/javascript");res.statusCode=200;return res.end(x)}catch(e){return json(res,404,{error:"not_found"},origin)}}
+ if(req.method==="GET"&&pathname==="/ruunion-logo.png"){try{const x=fs.readFileSync(path.join(process.cwd(),"app/src/main/assets/ruunion-logo.png"));for(const[k,v]of Object.entries(cors(origin)))res.setHeader(k,v);res.setHeader("Content-Type","image/png");res.statusCode=200;return res.end(x)}catch(e){return json(res,404,{error:"not_found"},origin)}}
+ if(req.method!=="POST"||pathname!=="/meeting")return json(res,404,{error:"not_found"},origin);
  if(!JAAS_APP_ID||!JAAS_KID||!(JAAS_PRIVATE_KEY_B64||JAAS_PRIVATE_KEY))return json(res,503,{error:"not_configured",message:"JaaS n’est pas encore configuré côté serveur."},origin);
  if(!allowed(req))return json(res,429,{error:"rate_limited",message:"Trop de demandes. Réessayez dans une minute."},origin);
  let raw="";for await(const chunk of req){raw+=chunk;if(raw.length>10000)break}
