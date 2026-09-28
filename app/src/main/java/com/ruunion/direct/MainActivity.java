@@ -99,8 +99,8 @@ public class MainActivity extends Activity {
 
  public static class AndroidBridge{
   private final Context context;AndroidBridge(Context c){context=c.getApplicationContext();}
-  @JavascriptInterface public void scheduleNotification(String id,String title,String code,long whenMs){
-   Intent i=new Intent(context,MeetingNotificationReceiver.class);i.putExtra("title",title);i.putExtra("code",code);
+  @JavascriptInterface public void scheduleNotification(String id,String title,String code,long whenMs,String body,String location){
+   Intent i=new Intent(context,MeetingNotificationReceiver.class);i.putExtra("title",title);i.putExtra("code",code);i.putExtra("body",body);i.putExtra("location",location);
    int rc=Math.abs(id.hashCode());PendingIntent pi=PendingIntent.getBroadcast(context,rc,i,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
    AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);if(am==null)return;
    if(Build.VERSION.SDK_INT>=31&&!am.canScheduleExactAlarms())whenMs=Math.max(whenMs,System.currentTimeMillis()+60000);
