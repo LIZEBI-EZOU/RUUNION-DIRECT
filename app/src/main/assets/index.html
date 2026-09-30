@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RÉUNION DIRECT</title>
 <script src="https://8x8.vc/vpaas-magic-cookie-b2b67b10aa9c47f3a51b4ec37ad2194d/external_api.js"></script>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b4ea2"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b4ea2">
 <style>*{box-sizing:border-box}body{margin:0;background:#f5f9ff;color:#12304f;font-family:Arial,sans-serif}
 main{max-width:900px;margin:auto;padding:16px 14px 92px}h1{margin:0;color:#0b4ea2;font-size:24px}.sub{color:#5d7187;margin:4px 0 14px}
 .card{background:#fff;border:1px solid #d7e5f5;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 5px 18px rgba(11,78,162,.07)}
@@ -14,27 +14,15 @@ main{max-width:900px;margin:auto;padding:16px 14px 92px}h1{margin:0;color:#0b4ea
 .action-card{min-height:112px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,#fff,#f8fbff);border:1px solid #d7e5f5;border-radius:15px;padding:14px}
 .action-card h3{margin:0 0 5px;font-size:15px;color:#12304f}.action-card p{margin:0 0 12px;font-size:12px;color:#6a7f94;line-height:1.35}
 input,button{font:inherit;border-radius:10px;padding:11px}input{width:100%;background:#fff;color:#12304f;border:1px solid #b9cee5;margin:6px 0 12px}
-button{border:0;background:#18a957;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 3px 9px rgba(24,169,87,.18)}button:hover{background:#138f49}.danger{background:#b42318}.top-button{background:#fff;color:#0b4ea2;border:1px solid #0b4ea2;box-shadow:none}
+button{border:0;background:#1769e0;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 3px 9px rgba(23,105,224,.20)}button:hover{background:#0b4ea2}.danger{background:#b42318}.top-button{background:#fff;color:#0b4ea2;border:1px solid #0b4ea2;box-shadow:none}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.meet{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid #e3edf8;padding:12px 0}
 .code{color:#0b4ea2;font-family:monospace;font-weight:700}.small{font-size:13px;color:#6a7f94}.brand{display:flex;align-items:center;gap:12px;margin-bottom:10px}.logo{width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 3px 12px rgba(11,78,162,.18)}
 .brand-title{display:flex;flex-direction:column}.brand-title strong{color:#0b4ea2;font-size:20px}.brand-title span{font-size:12px;color:#6a7f94}
 .notice{padding:12px;border-radius:12px;background:#eef6ff;border:1px solid #cfe3fa;color:#174b7a;margin-top:12px}.success{background:#effaf3;border-color:#b8e1c5;color:#1e6b35}.warn{background:#fff8e8;border-color:#f2d38b;color:#7b5b0b}
 .modal{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:60;align-items:center;justify-content:center;padding:18px}.modal .box{width:min(620px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 15px 45px rgba(0,0,0,.25)}
-#call{display:none;position:fixed;inset:0;background:#071a2e;z-index:10}#jitsi{position:absolute;inset:0}
-#leave{position:absolute;z-index:20;left:12px;top:12px;padding:9px 14px;background:#fff;color:#0b4ea2;border:1px solid #0b4ea2;box-shadow:none}
-#callTop{position:absolute;z-index:19;left:0;right:0;top:0;height:58px;pointer-events:none;background:linear-gradient(180deg,rgba(7,26,46,.62),transparent)}
-#roleBadge{display:inline-block;padding:6px 9px;border-radius:999px;background:#eef6ff;color:#0b4ea2;font-size:12px;font-weight:700;position:absolute;z-index:21;left:118px;top:14px}
-#netBadge{position:absolute;z-index:21;right:14px;top:14px;padding:6px 9px;border-radius:999px;background:#effaf3;color:#1e6b35;font-size:11px;font-weight:700}
-#meetingBottomBar{position:absolute;z-index:22;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:9px 10px;background:rgba(7,26,46,.9);border:1px solid rgba(255,255,255,.14);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-#meetingBottomBar button{min-width:74px;padding:9px 10px;font-size:12px}
-#participantsPanel{position:absolute;z-index:23;right:14px;bottom:78px;width:min(330px,calc(100% - 28px));max-height:45vh;overflow:auto;background:rgba(255,255,255,.97);color:#12304f;border-radius:14px;padding:12px;display:none;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.participant{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #e3edf8;font-size:13px}
-#preflight{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:70;align-items:center;justify-content:center;padding:18px}#preflight .box,#errorBox .box{width:min(560px,100%);background:#fff;border-radius:18px;padding:20px;box-shadow:0 15px 45px rgba(0,0,0,.25)}
-.test{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #e3edf8}.pill{padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}
-#preview{width:100%;aspect-ratio:16/9;background:#071a2e;border-radius:12px;margin:10px 0;object-fit:cover}
-#errorBox{display:none;position:fixed;inset:0;background:rgba(7,26,46,.72);z-index:80;align-items:center;justify-content:center;padding:18px}
+#call{display:none;position:fixed;inset:0;background:#05070b;z-index:100}#daily{position:absolute;inset:0}#callLoading{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:#0b4ea2;color:#fff;font-weight:700;font-size:16px;transition:opacity .18s ease}#callLoading.hide{opacity:0;pointer-events:none}#errorBox{display:none;position:fixed;inset:0;background:rgba(5,18,40,.78);z-index:120;align-items:center;justify-content:center;padding:18px}#errorBox .box{width:min(560px,100%);background:#fff;border-radius:18px;padding:20px;box-shadow:0 15px 45px rgba(0,0,0,.25)}
 @media(max-width:720px){.table-grid.three{grid-template-columns:1fr}.table-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.table-grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}#meetingBottomBar{left:8px;right:8px;transform:none;justify-content:space-between;gap:5px}#meetingBottomBar button{min-width:0;flex:1;padding:9px 6px}#roleBadge{left:104px;font-size:11px}}</style>
+@media(max-width:600px){.table-grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}}</style>
 </head>
 <body>
 <main>
@@ -56,18 +44,7 @@ button{border:0;background:#18a957;color:#fff;font-weight:700;cursor:pointer;box
 <div class="card"><h2>Réunions récentes</h2><div id="history"></div><button onclick="clearHistory()">Effacer l'historique</button></div>
 <div id="call">
 <div id="daily"></div>
-<div id="callTop"></div>
-<span id="roleBadge">Connexion…</span>
-<div id="netBadge">● Réseau OK · 0/100</div>
-<button id="leave" class="top-button" onclick="closeCall()">← Quitter</button>
-<div id="meetingBottomBar">
-<button onclick="toggleParticipants()">Participants</button>
-<button onclick="share()">Inviter</button>
-<button onclick="copyLink()">Copier</button>
-<button onclick="showQr()">QR</button>
-<button onclick="showMeetingTools()">Outils</button>
-</div>
-<div id="participantsPanel"><b>Participants</b><div id="participantsList"></div></div>
+<div id="callLoading">RÉUNION DIRECT · Connexion sécurisée…</div>
 </div><div id="identityModal" class="modal"><div class="box"><h2>Identifiant de réunion</h2><label>Votre nom</label><input id="modalName" placeholder="Votre nom"><label>Votre adresse e-mail</label><input id="modalEmail" type="email" placeholder="nom@exemple.com"><div class="row"><button onclick="saveIdentityFromModal()">Enregistrer</button><button class="top-button" onclick="closeModal('identityModal')">Fermer</button></div></div></div>
 <div id="instantModal" class="modal"><div class="box"><h2>Réunion instantanée</h2><label>Nom de la réunion</label><input id="modalTitle" placeholder="RÉUNION DIRECT"><p class="small">Maximum : <b>100 participants</b>.</p><div class="row"><button id="startModeratorBtn" onclick="startInstantFromButton(true)">Démarrer comme modérateur</button><button id="startParticipantBtn" onclick="startInstantFromButton(false)">Rejoindre comme participant</button></div><button class="top-button" onclick="closeModal('instantModal')">Annuler</button></div></div>
 <div id="connectionModal" class="modal"><div class="box"><h2>Connexion</h2><div class="row"><button onclick="openBrowser()">🌐 Navigateur</button><button onclick="openAppHint()">📱 Application Android</button></div><div id="browserNotice" class="notice">Prêt à vous connecter.</div><button class="top-button" onclick="closeModal('connectionModal')">Fermer</button></div></div>
@@ -75,14 +52,6 @@ button{border:0;background:#18a957;color:#fff;font-weight:700;cursor:pointer;box
 <div id="scheduleModal" class="modal"><div class="box"><h2>Programmer une réunion</h2><input id="schedTitle" placeholder="Titre de la réunion"><div class="row"><input id="schedDate" type="datetime-local"><input id="schedEnd" type="datetime-local"></div><input id="schedDescription" placeholder="Description"><input id="schedLocation" placeholder="Lieu / salle"><input id="schedAttendees" placeholder="Participants (e-mails séparés par des virgules)"><label><input id="schedVirtual" type="checkbox" checked> Réunion virtuelle</label><p class="small">Fuseau horaire : Africa/Lubumbashi</p><button onclick="schedule()">Créer la réunion JaaS et programmer le rappel</button><div id="list"></div><button class="top-button" onclick="closeModal('scheduleModal')">Fermer</button></div></div>
 <div id="advancedModal" class="modal"><div class="box"><h2>Fonctionnalités avancées Jitsi</h2><div class="row"><button onclick="startRecording()">Enregistrer</button><button onclick="stopRecording()">Arrêter</button></div><div class="row"><button onclick="toggleScreenShare()">Partager l’écran</button><button onclick="toggleTranscription()">Transcription / sous-titres</button></div><button class="top-button" onclick="closeModal('advancedModal')">Fermer</button></div></div>
 <div id="serviceModal" class="modal"><div class="box"><h2>Service de réunion</h2><p class="small">Réunions vidéo par JaaS sur <b>8x8.vc</b>. Aucun compte RÉUNION DIRECT n’est requis.</p><div id="serviceStatus" class="notice">Vérification du service…</div><button onclick="checkServer()">Vérifier le service</button><button class="top-button" onclick="closeModal('serviceModal')">Fermer</button></div></div>
-<div id="optionsBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:59;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(520px,100%);background:#fff;border-radius:18px;padding:20px"><h2>Options facultatives</h2><label><input id="mute" type="checkbox" checked> Arriver micro et caméra coupés</label><br><label><input id="noise" type="checkbox" checked> Suppression du bruit</label><p class="small">Les options vidéo, audio et appareil sont facultatives et peuvent être modifiées avant la réunion.</p><button class="top-button" onclick="closeOptions()">Fermer</button></div></div><div id="preflight"><div class="box">
-<h2>Préparer votre réunion</h2><p class="small">Vérifiez votre caméra et votre microphone avant d’entrer.</p>
-<video id="preview" autoplay muted playsinline></video>
-<div class="test"><span>Caméra</span><span id="camStatus" class="pill warn">Test…</span></div>
-<div class="test"><span>Microphone</span><span id="micStatus" class="pill warn">Test…</span></div>
-<div id="preflightMessage" class="notice">Autorisez la caméra et le microphone pour continuer.</div>
-<div class="row"><button class="muted" onclick="cancelPreflight()">Annuler</button><button onclick="confirmPreflight()">Continuer</button></div>
-</div></div>
 <div id="qrBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:50;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(420px,100%);background:#fff;border-radius:18px;padding:20px;text-align:center"><h2>Invitation QR</h2><div id="qrCanvas" style="display:flex;justify-content:center;margin:18px 0"></div><p id="qrCodeText" class="code"></p><button class="muted" onclick="closeQr()">Fermer</button></div></div>
 <div id="toolsBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:49;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(520px,100%);background:#fff;border-radius:18px;padding:20px"><h2>Outils de réunion</h2><div id="techStats" class="notice">Statistiques techniques : collecte en cours…</div><div class="row"><button class="muted" onclick="startRecording()">Démarrer l’enregistrement</button><button class="muted" onclick="toggleScreenShare()">Partager l’écran</button></div><div class="row"><button class="muted" onclick="toggleTranscription()">Transcription / sous-titres</button><button class="muted" onclick="refreshParticipants()">Actualiser les participants</button></div><button class="muted" onclick="closeMeetingTools()">Fermer</button></div></div>
 <div id="dashboardBox" style="display:none;position:fixed;inset:0;background:rgba(7,26,46,.78);z-index:48;align-items:center;justify-content:center;padding:18px"><div class="box" style="width:min(680px,100%);max-height:85vh;overflow:auto;background:#fff;border-radius:18px;padding:20px"><h2>Tableau de bord</h2><div id="dashboardContent"></div><button class="muted" onclick="closeDashboard()">Fermer</button></div></div>
@@ -92,7 +61,7 @@ const JITSI_DOMAIN="8x8.vc";
 const JAAS_APP_ID="vpaas-magic-cookie-b2b67b10aa9c47f3a51b4ec37ad2194d";
 const API_BASE="https://ruunion-direct-api.onrender.com";
 const PUBLIC_WEB_URL=location.origin+"/";
-let callFrame=null,currentRoom="",currentUrl="",currentTitle="",currentCode="",currentModerator=false,currentJoinData=null,preflightStream=null,reconnectTimer=null;
+let callFrame=null,currentRoom="",currentUrl="",currentTitle="",currentCode="",currentModerator=false,currentJoinData=null,reconnectTimer=null;
 const MAX_PARTICIPANTS=100;
 let meetingStartedAt=0,participantSessions={},lastNetworkQuality="unknown",reconnectAttempts=0,lastParticipantCount=0;
 const key="ruunion-meetings-v4",histKey="ruunion-history-v4",profileKey="ruunion-profile-v1";
@@ -142,16 +111,9 @@ async function join(){
   await prepareAndOpen(data,c||room,title,false);addHistory(title,c||room);
  }catch(e){const n=document.querySelector("#startNotice");if(n){n.className="notice warn";n.textContent="Impossible de rejoindre la réunion.";}showError("Impossible de rejoindre directement la réunion : "+e.message)}
 }
-async function prepareAndOpen(data,c,title,moderator){
- currentJoinData={data,c,title,moderator};resetMeetingMetrics();
- if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){openJitsi(data,c,title,moderator);return}
- document.querySelector("#preflight").style.display="flex";document.querySelector("#preflightMessage").className="notice";document.querySelector("#preflightMessage").textContent="Test de la caméra et du microphone…";
- try{preflightStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:{echoCancellation:true,noiseSuppression:document.querySelector("#noise").checked,autoGainControl:true}});await refreshDevices();document.querySelector("#preview").srcObject=preflightStream;document.querySelector("#camStatus").textContent="✓ OK";document.querySelector("#camStatus").className="pill success";document.querySelector("#micStatus").textContent="✓ OK";document.querySelector("#micStatus").className="pill success";document.querySelector("#preflightMessage").className="notice success";document.querySelector("#preflightMessage").textContent="Tout est prêt. Vous pouvez entrer dans la réunion."}
- catch(e){document.querySelector("#camStatus").textContent="À vérifier";document.querySelector("#micStatus").textContent="À vérifier";document.querySelector("#preflightMessage").className="notice warn";document.querySelector("#preflightMessage").textContent="Permission caméra/micro refusée ou appareil indisponible. Vous pouvez continuer."}
+function prepareAndOpen(data,c,title,moderator){
+ currentJoinData={data,c,title,moderator};resetMeetingMetrics();openJitsi(data,c,title,moderator);
 }
-function stopPreflight(){if(preflightStream){preflightStream.getTracks().forEach(t=>t.stop());preflightStream=null}const v=document.querySelector("#preview");if(v)v.srcObject=null}
-function cancelPreflight(){stopPreflight();document.querySelector("#preflight").style.display="none";currentJoinData=null}
-function confirmPreflight(){const j=currentJoinData;if(!j)return;stopPreflight();document.querySelector("#preflight").style.display="none";openJitsi(j.data,j.c,j.title,j.moderator)}
 function resetMeetingMetrics(){meetingStartedAt=Date.now();participantSessions={};lastNetworkQuality="unknown";reconnectAttempts=0}
 function saveMeetingMetrics(){if(!meetingStartedAt)return;const duration=Math.max(0,Math.round((Date.now()-meetingStartedAt)/1000)),a=get(histKey),idx=a.findIndex(x=>x.code===currentCode);if(idx>=0){a[idx].duration=(a[idx].duration||0)+duration;a[idx].lastQuality=lastNetworkQuality;a[idx].participants=Object.keys(participantSessions).length;a[idx].reconnects=(a[idx].reconnects||0)+reconnectAttempts;put(histKey,a)}}
 function showMeetingTools(){document.querySelector("#toolsBox").style.display="flex";updateTechStats()}
@@ -160,43 +122,55 @@ function showDashboard(){const a=get(histKey),total=a.length,durations=a.reduce(
 function closeDashboard(){document.querySelector("#dashboardBox").style.display="none"}
 function showQr(){const u=currentUrl||roomUrl(currentRoom),box=document.querySelector("#qrBox"),q=document.querySelector("#qrCanvas");q.innerHTML="";document.querySelector("#qrCodeText").textContent=currentCode;box.style.display="flex";if(window.QRCode)new QRCode(q,{text:u,width:220,height:220});else q.textContent=u}
 function closeQr(){document.querySelector("#qrBox").style.display="none"}
-function updateParticipantLimit(count){lastParticipantCount=count;const n=document.querySelector("#netBadge");if(n)n.textContent="● Réseau "+(lastNetworkQuality===false?"interrompu":"OK")+" · "+count+"/"+MAX_PARTICIPANTS}
+function updateParticipantLimit(count){lastParticipantCount=count}
 function enforceParticipantLimit(){if(!callFrame||!currentModerator)return;try{let count=0;if(callFrame.getNumberOfParticipants)count=callFrame.getNumberOfParticipants();else if(callFrame.getParticipantsInfo)count=(callFrame.getParticipantsInfo()||[]).length+1;if(count>MAX_PARTICIPANTS){const list=callFrame.getParticipantsInfo?callFrame.getParticipantsInfo()||[]:[];const newest=list[list.length-1];if(newest?.id&&callFrame.executeCommand)callFrame.executeCommand("kickParticipant",newest.id);showError("La réunion a atteint sa limite de 100 participants. Le participant supplémentaire a été refusé.")}}catch(e){}}
-function updateTechStats(){if(!callFrame)return;let n=0;try{n=callFrame.getNumberOfParticipants?callFrame.getNumberOfParticipants():Object.keys(callFrame.getParticipantsInfo?callFrame.getParticipantsInfo():{}).length}catch(e){}document.querySelector("#techStats").textContent="Participants connectés : "+n+" / "+MAX_PARTICIPANTS+" · Jitsi · Réseau : "+lastNetworkQuality;updateParticipantLimit(n);enforceParticipantLimit()}
+function updateTechStats(){if(!callFrame)return;let n=0;try{n=callFrame.getNumberOfParticipants?callFrame.getNumberOfParticipants():((callFrame.getParticipantsInfo?callFrame.getParticipantsInfo():[])||[]).length}catch(e){}updateParticipantLimit(n);enforceParticipantLimit();const s=document.querySelector("#techStats");if(s)s.textContent="Participants connectés : "+n+" / "+MAX_PARTICIPANTS+" · Jitsi · Réseau : "+lastNetworkQuality}
 function startRecording(){showError("L’enregistrement n’est pas activé par cette intégration publique Jitsi.")}
 function stopRecording(){}
 function toggleScreenShare(){if(!callFrame)return;try{callFrame.executeCommand("toggleShareScreen")}catch(e){showError("Le partage d’écran n’est pas disponible sur cet appareil.")}}
 function toggleTranscription(){showError("La transcription n’est pas activée sur la salle publique Jitsi.")}
 async function openJitsi(data,c,title,moderator){
- currentRoom=data.roomName;currentUrl=data.url;currentCode=c;currentTitle=title;currentModerator=!!moderator;document.querySelector("#call").style.display="block";document.querySelector("#daily").innerHTML="";
- document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur":"Participant";document.querySelector("#roleBadge").className=moderator?"success":"";
+ currentRoom=data.roomName;currentUrl=data.url;currentCode=c;currentTitle=title;currentModerator=!!moderator;
+ document.querySelector("#call").style.display="block";document.querySelector("#daily").innerHTML="";
+ const loading=document.querySelector("#callLoading");if(loading){loading.classList.remove("hide");loading.textContent="RÉUNION DIRECT · Connexion sécurisée…"}
  if(callFrame){try{callFrame.dispose()}catch(e){}callFrame=null}
  try{
-  const muted=document.querySelector("#mute").checked;
-  const options={roomName:data.roomName,parentNode:document.querySelector("#daily"),width:"100%",height:"100%",domain:JITSI_DOMAIN,lang:"fr",jwt:data.token,userInfo:{displayName:data.name,email:data.email},configOverwrite:{prejoinConfig:{enabled:true},startWithAudioMuted:muted,startWithVideoMuted:muted,disableInviteFunctions:false,enableWelcomePage:false,enableClosePage:false},interfaceConfigOverwrite:{MOBILE_APP_PROMO:false,SHOW_JITSI_WATERMARK:false,SHOW_WATERMARK_FOR_GUESTS:false,DISABLE_JOIN_LEAVE_NOTIFICATIONS:false}};
+  const options={
+   roomName:data.roomName,parentNode:document.querySelector("#daily"),width:"100%",height:"100%",domain:JITSI_DOMAIN,lang:"fr",jwt:data.token,
+   userInfo:{displayName:data.name,email:data.email},
+   onload:()=>{if(loading){loading.classList.add("hide");setTimeout(()=>{if(loading)loading.style.display="none"},220)}},
+   configOverwrite:{
+    prejoinConfig:{enabled:true,hideDisplayName:true,hideExtraJoinButtons:["no-audio","by-phone"],showHangUp:true},
+    startWithAudioMuted:true,startWithVideoMuted:true,disableInitialGUM:false,
+    disableInviteFunctions:true,enableWelcomePage:false,enableClosePage:false,disableDeepLinking:true,
+    toolbarButtons:moderator?["microphone","camera","chat","participants-pane","desktop","hangup"]:["microphone","camera","chat","participants-pane","hangup"],
+    toolbarConfig:{backgroundColor:"#0b4ea2",initialTimeout:5000,timeout:3500,alwaysVisible:false}
+   },
+   interfaceConfigOverwrite:{
+    MOBILE_APP_PROMO:false,SHOW_JITSI_WATERMARK:false,SHOW_WATERMARK_FOR_GUESTS:false,
+    DISABLE_JOIN_LEAVE_NOTIFICATIONS:false
+   }
+  };
   callFrame=new JitsiMeetExternalAPI(JITSI_DOMAIN,options);
-  callFrame.addListener("videoConferenceJoined",e=>{document.querySelector("#roleBadge").textContent=moderator?"✓ Modérateur actif":"Participant";document.querySelector("#roleBadge").className=moderator?"success":"";setNetwork(true);refreshParticipants()});
-  callFrame.addListener("participantJoined",e=>{if(e?.id)participantSessions[e.id]={joined:Date.now(),name:e.displayName||"Participant"};refreshParticipants();updateTechStats();if(currentModerator)setTimeout(enforceParticipantLimit,200)});
-  callFrame.addListener("participantLeft",e=>{if(e?.id)participantSessions[e.id]=participantSessions[e.id]||{joined:Date.now()};refreshParticipants();updateTechStats()});
+  callFrame.addListener("videoConferenceJoined",()=>{setNetwork(true);updateTechStats()});
+  callFrame.addListener("participantJoined",e=>{if(e?.id)participantSessions[e.id]={joined:Date.now(),name:e.displayName||"Participant"};updateTechStats();if(currentModerator)setTimeout(enforceParticipantLimit,200)});
+  callFrame.addListener("participantLeft",e=>{if(e?.id)participantSessions[e.id]=participantSessions[e.id]||{joined:Date.now()};updateTechStats()});
   callFrame.addListener("videoConferenceLeft",()=>{});
-  callFrame.addListener("error",e=>showError("La connexion Jitsi a rencontré une erreur. Vérifiez Internet puis réessayez."));
+  callFrame.addListener("error",()=>showError("La connexion Jitsi a rencontré une erreur. Vérifiez Internet puis réessayez."));
   callFrame.addListener("connectionFailed",()=>{setNetwork(false);showError("La connexion Jitsi a été interrompue.")});
   callFrame.addListener("connectionEstablished",()=>setNetwork(true));
   callFrame.addListener("audioMuteStatusChanged",updateTechStats);callFrame.addListener("videoMuteStatusChanged",updateTechStats);
-  setTimeout(refreshParticipants,1500);
- }catch(e){document.querySelector("#roleBadge").textContent="Jitsi indisponible";document.querySelector("#roleBadge").className="warn";showError("Jitsi ne peut pas être chargé : "+e.message)}
+ }catch(e){if(loading)loading.classList.add("hide");showError("Jitsi ne peut pas être chargé : "+e.message)}
 }
-async function refreshDevices(){try{if(!navigator.mediaDevices?.enumerateDevices)return;const d=await navigator.mediaDevices.enumerateDevices(),cams=d.filter(x=>x.kind==="videoinput").length,mics=d.filter(x=>x.kind==="audioinput").length,msg=document.querySelector("#preflightMessage");if(msg&&document.querySelector("#preflight").style.display==="flex")msg.textContent="Appareils détectés : "+cams+" caméra(s), "+mics+" microphone(s)."}catch(e){}}
-if(navigator.mediaDevices?.addEventListener)navigator.mediaDevices.addEventListener("devicechange",refreshDevices)
-async function refreshParticipants(){if(!callFrame)return;try{let all=[];if(callFrame.getParticipantsInfo)all=callFrame.getParticipantsInfo()||[];const list=document.querySelector("#participantsList");list.innerHTML=all.length?all.map(x=>"<div class='participant'><span>"+esc(x.displayName||"Participant")+"</span></div>").join(""):"<p class='small'>Aucun autre participant détecté.</p>"}catch(e){}}
-function toggleParticipants(){const p=document.querySelector("#participantsPanel");p.style.display=p.style.display==="block"?"none":"block";if(p.style.display==="block")refreshParticipants()}
-function setNetwork(ok){lastNetworkQuality=ok?"ok":false;updateParticipantLimit(lastParticipantCount);const n=document.querySelector("#netBadge");n.className=ok?"":"warn"}
+function refreshParticipants(){updateTechStats()}
+function toggleParticipants(){if(callFrame)try{callFrame.executeCommand("toggleParticipantsPane")}catch(e){}}
+function setNetwork(ok){lastNetworkQuality=ok?"ok":false}
 function showError(t){document.querySelector("#errorText").textContent=t;document.querySelector("#errorBox").style.display="flex"}
 function closeError(){document.querySelector("#errorBox").style.display="none"}
 async function retryCall(){closeError();if(!currentJoinData)return;if(reconnectTimer)clearTimeout(reconnectTimer);reconnectAttempts++;const delay=Math.min(15000,500*Math.pow(2,Math.min(reconnectAttempts-1,5)));reconnectTimer=setTimeout(()=>{if(currentJoinData){if(callFrame){try{callFrame.dispose()}catch(e){}callFrame=null}openJitsi(currentJoinData.data,currentJoinData.c,currentJoinData.title,currentJoinData.moderator)}},delay)}
 window.addEventListener("offline",()=>{setNetwork(false);if(callFrame)showError("Internet semble indisponible. La reconnexion sera tentée au retour du réseau.")});
 window.addEventListener("online",()=>{setNetwork(true);if(callFrame&&currentJoinData)retryCall()});
-async function checkServer(){try{const r=await fetch(API_BASE+"/health");const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||"Backend indisponible");document.querySelector("#startNotice").className="notice success";document.querySelector("#startNotice").textContent="JaaS est prêt. Le serveur RÉUNION DIRECT génère les JWT sécurisés.";return true}catch(e){document.querySelector("#startNotice").className="notice warn";document.querySelector("#startNotice").textContent="Le serveur JaaS est temporairement indisponible. Les réunions pourront démarrer dès que le service sera prêt.";return false}}
+async function checkServer(){const s=document.querySelector("#serviceStatus");if(!s)return false;try{const r=await fetch(API_BASE+"/health",{cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||"Backend indisponible");s.className="notice success";s.textContent="JaaS est prêt. Le serveur RÉUNION DIRECT génère les JWT sécurisés.";return true}catch(e){s.className="notice warn";s.textContent="Le service JaaS est temporairement indisponible. Réessayez dans quelques instants.";return false}}
 async function closeCall(){saveMeetingMetrics();if(callFrame){try{callFrame.dispose()}catch(e){}callFrame=null}document.querySelector("#call").style.display="none";document.querySelector("#participantsPanel").style.display="none";currentRoom="";currentUrl="";currentCode="";currentModerator=false;currentJoinData=null;busy=false}
 async function copyLink(){const u=currentUrl||roomUrl(currentRoom);try{await navigator.clipboard.writeText(u);alert("Lien copié.")}catch(e){const ta=document.createElement("textarea");ta.value=u;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("Lien copié.")}}
 function share(){const u=currentUrl||roomUrl(currentRoom),t="Rejoins-moi sur RÉUNION DIRECT : "+u+"\nCode : "+currentCode;if(navigator.share)navigator.share({title:"RÉUNION DIRECT",text:t,url:u}).catch(()=>{});else if(android)AndroidBridge.openMeetingInBrowser("https://wa.me/?text="+encodeURIComponent(t));else window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank","noopener")}
@@ -209,6 +183,6 @@ function renderHistory(){const a=get(histKey),l=document.querySelector("#history
 function joinCode(c){document.querySelector("#joinCode").value=c;join()}
 function clearHistory(){put(histKey,[]);renderHistory()}
 function esc(s){return String(s).replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[x]))}
-if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});loadProfile();checkServer();if(!android&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission().catch(()=>{});get(key).filter(m=>new Date(m.date)>new Date()).forEach(scheduleNative);render();renderHistory();</script>
+loadProfile();get(key).filter(m=>new Date(m.date)>new Date()).forEach(scheduleNative);render();renderHistory();if("serviceWorker"in navigator&&location.protocol.startsWith("http"))window.setTimeout(()=>navigator.serviceWorker.register("sw.js").catch(()=>{}),1200);</script>
 </body>
 </html>
