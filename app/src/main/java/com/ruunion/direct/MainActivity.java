@@ -30,14 +30,25 @@ public class MainActivity extends Activity {
   if(Build.VERSION.SDK_INT>=21)s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
   webView.setWebViewClient(new WebViewClient(){
    private void ensureJaasExternalApi(WebView v){
-    String js="(function(){if(typeof window.JitsiMeetExternalAPI==='function'){return;}var s=document.getElementById('ruunion-jaas-api-fallback');if(s)return;s=document.createElement('script');s.id='ruunion-jaas-api-fallback';s.src='"+JAAS_API_FALLBACK+"';s.async=true;document.head.appendChild(s);})();";
+    String js="(function(){"+
+      "function loadApi(){if(typeof window.JitsiMeetExternalAPI==='function')return Promise.resolve();"+
+      "return new Promise(function(resolve,reject){var s=document.getElementById('ruunion-jaas-api-fallback');"+
+      "if(s){var t=setInterval(function(){if(typeof window.JitsiMeetExternalAPI==='function'){clearInterval(t);resolve();}},50);setTimeout(function(){clearInterval(t);reject(new Error('JaaS API timeout'));},8000);return;}"+
+      "s=document.createElement('script');s.id='ruunion-jaas-api-fallback';s.src='"+JAAS_API_FALLBACK+"';s.async=true;s.onload=function(){resolve();};s.onerror=function(){reject(new Error('JaaS API indisponible'));};document.head.appendChild(s);});}"+
+      "if(typeof window.openJitsi==='function'&&!window.__ruunionJitsiWrapped){"+
+      "window.__ruunionJitsiWrapped=true;window.__ruunionOriginalOpenJitsi=window.openJitsi;"+
+      "window.openJitsi=async function(){var a=arguments;try{await loadApi();return window.__ruunionOriginalOpenJitsi.apply(window,a);}catch(e){"+
+      "if(window.AndroidBridge&&window.AndroidBridge.openMeetingInBrowser&&a[0]&&a[0].url){window.AndroidBridge.openMeetingInBrowser(a[0].url);}"+
+      "if(window.showError)window.showError('Le moteur Jitsi est momentanément indisponible dans l’application. La réunion peut être ouverte dans le navigateur.');}};}"+
+      "else{loadApi().catch(function(){});}})();";
     v.evaluateJavascript(js,null);
    }
    @Override public void onPageFinished(WebView v,String url){
     super.onPageFinished(v,url);
     ensureJaasExternalApi(v);
-    v.postDelayed(()->ensureJaasExternalApi(v),1200);
-    v.postDelayed(()->ensureJaasExternalApi(v),3000);
+    v.postDelayed(()->ensureJaasExternalApi(v),1000);
+    v.postDelayed(()->ensureJaasExternalApi(v),2500);
+    v.postDelayed(()->ensureJaasExternalApi(v),5000);
    }
    @Override public WebResourceResponse shouldInterceptRequest(WebView v,WebResourceRequest r){
     Uri u=r.getUrl();
@@ -75,9 +86,6 @@ public class MainActivity extends Activity {
      for(String x:r.getResources())if(PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(x)||PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(x))a.add(x);
      if(!a.isEmpty())r.grant(a.toArray(new String[0]));else r.deny();
     });
-   }
-   @Override public boolean onConsoleMessage(ConsoleMessage m){
-    return super.onConsoleMessage(m);
    }
   });
   webView.addJavascriptInterface(new AndroidBridge(this),"AndroidBridge");
