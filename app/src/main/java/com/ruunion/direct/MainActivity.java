@@ -14,6 +14,7 @@ import java.util.*;
 public class MainActivity extends Activity {
  private WebView webView;
  private static final int MEDIA_PERMISSION_REQUEST=42,NOTIFICATION_PERMISSION_REQUEST=43;
+ private static final String JAAS_API_FALLBACK="https://8x8.vc/external_api.js";
 
  @Override public void onCreate(Bundle state){
   super.onCreate(state);
@@ -23,9 +24,21 @@ public class MainActivity extends Activity {
   WebSettings s=webView.getSettings();
   s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setDatabaseEnabled(true);
   s.setMediaPlaybackRequiresUserGesture(false);s.setAllowFileAccess(false);s.setAllowContentAccess(false);
+  s.setJavaScriptCanOpenWindowsAutomatically(true);s.setSupportMultipleWindows(false);
+  s.setCacheMode(WebSettings.LOAD_DEFAULT);
   if(Build.VERSION.SDK_INT>=26)s.setSafeBrowsingEnabled(true);
   if(Build.VERSION.SDK_INT>=21)s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
   webView.setWebViewClient(new WebViewClient(){
+   private void ensureJaasExternalApi(WebView v){
+    String js="(function(){if(typeof window.JitsiMeetExternalAPI==='function'){return;}var s=document.getElementById('ruunion-jaas-api-fallback');if(s)return;s=document.createElement('script');s.id='ruunion-jaas-api-fallback';s.src='"+JAAS_API_FALLBACK+"';s.async=true;document.head.appendChild(s);})();";
+    v.evaluateJavascript(js,null);
+   }
+   @Override public void onPageFinished(WebView v,String url){
+    super.onPageFinished(v,url);
+    ensureJaasExternalApi(v);
+    v.postDelayed(()->ensureJaasExternalApi(v),1200);
+    v.postDelayed(()->ensureJaasExternalApi(v),3000);
+   }
    @Override public WebResourceResponse shouldInterceptRequest(WebView v,WebResourceRequest r){
     Uri u=r.getUrl();
     if("https".equalsIgnoreCase(u.getScheme())&&"ruunion.local".equalsIgnoreCase(u.getHost())){
@@ -36,7 +49,6 @@ public class MainActivity extends Activity {
     }
     return super.shouldInterceptRequest(v,r);
    }
-
    @Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){
     Uri u=r.getUrl();String scheme=u.getScheme();
     if("file".equals(scheme)||"https".equals(scheme))return false;
@@ -44,20 +56,28 @@ public class MainActivity extends Activity {
     return true;
    }
    @Override public void onReceivedError(WebView v,WebResourceRequest r,WebResourceError e){
+    if(r!=null&&r.getUrl()!=null&&r.getUrl().toString().contains("external_api.js")){ensureJaasExternalApi(v);return;}
     if(r.isForMainFrame()&&Build.VERSION.SDK_INT>=23){
-     v.loadDataWithBaseURL(null,"<html><body style='font-family:sans-serif;padding:24px'><h2>RUUNION DIRECT</h2><p>Connexion Internet indisponible. Vérifiez votre réseau puis relancez l'application.</p></body></html>","text/html","UTF-8",null);
+     v.loadDataWithBaseURL(null,"<html><body style='font-family:sans-serif;padding:24px'><h2>RÉUNION DIRECT</h2><p>Connexion Internet indisponible. Vérifiez votre réseau puis relancez l'application.</p></body></html>","text/html","UTF-8",null);
     }
+   }
+   @Override public void onReceivedHttpError(WebView v,WebResourceRequest r,WebResourceResponse e){
+    super.onReceivedHttpError(v,r,e);
+    if(r!=null&&r.getUrl()!=null&&r.getUrl().toString().contains("external_api.js"))ensureJaasExternalApi(v);
    }
   });
   webView.setWebChromeClient(new WebChromeClient(){
    @Override public void onPermissionRequest(final PermissionRequest r){
     runOnUiThread(()->{
      Uri origin=r.getOrigin();
-     if(origin==null||!"https".equals(origin.getScheme())||!"8x8.vc".equalsIgnoreCase(origin.getHost())){r.deny();return;}
+     if(origin==null||!"https".equalsIgnoreCase(origin.getScheme())||!"8x8.vc".equalsIgnoreCase(origin.getHost())){r.deny();return;}
      List<String>a=new ArrayList<>();
      for(String x:r.getResources())if(PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(x)||PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(x))a.add(x);
      if(!a.isEmpty())r.grant(a.toArray(new String[0]));else r.deny();
     });
+   }
+   @Override public boolean onConsoleMessage(ConsoleMessage m){
+    return super.onConsoleMessage(m);
    }
   });
   webView.addJavascriptInterface(new AndroidBridge(this),"AndroidBridge");
@@ -66,8 +86,8 @@ public class MainActivity extends Activity {
   try{
    InputStream in=getAssets().open("index.html");ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] buf=new byte[8192];int n;
    while((n=in.read(buf))!=-1)out.write(buf,0,n);in.close();
-   webView.loadDataWithBaseURL("https://ruunion.local/",""+new String(out.toByteArray(),"UTF-8"),"text/html","UTF-8","https://ruunion.local/");
-  }catch(Exception e){webView.loadDataWithBaseURL("https://ruunion.local/","<h2>RUUNION DIRECT</h2><p>Impossible de charger l'application.</p>","text/html","UTF-8",null);}
+   webView.loadDataWithBaseURL("https://ruunion.local/",new String(out.toByteArray(),"UTF-8"),"text/html","UTF-8","https://ruunion.local/");
+  }catch(Exception e){webView.loadDataWithBaseURL("https://ruunion.local/","<h2>RÉUNION DIRECT</h2><p>Impossible de charger l'application.</p>","text/html","UTF-8",null);}
  }
 
  private void requestMediaPermissions(){
