@@ -15,6 +15,7 @@ public class MainActivity extends Activity {
  private WebView webView;
  private static final int MEDIA_PERMISSION_REQUEST=42,NOTIFICATION_PERMISSION_REQUEST=43;
  private static final String JAAS_API_FALLBACK="https://8x8.vc/external_api.js";
+ private static final String MODERATOR_EMAIL="ezouservices@gmail.com";
 
  @Override public void onCreate(Bundle state){
   super.onCreate(state);
@@ -35,9 +36,20 @@ public class MainActivity extends Activity {
       "return new Promise(function(resolve,reject){var s=document.getElementById('ruunion-jaas-api-fallback');"+
       "if(s){var t=setInterval(function(){if(typeof window.JitsiMeetExternalAPI==='function'){clearInterval(t);resolve();}},50);setTimeout(function(){clearInterval(t);reject(new Error('JaaS API timeout'));},8000);return;}"+
       "s=document.createElement('script');s.id='ruunion-jaas-api-fallback';s.src='"+JAAS_API_FALLBACK+"';s.async=true;s.onload=function(){resolve();};s.onerror=function(){reject(new Error('JaaS API indisponible'));};document.head.appendChild(s);});}"+
+      "function removeGate(){var g=document.getElementById('ruunionModeratorGate');if(g)g.remove();}"+
+      "function showGate(original,args){removeGate();var g=document.createElement('div');g.id='ruunionModeratorGate';g.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#05070b;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Arial,sans-serif;color:#fff;';"+
+      "var b=document.createElement('div');b.style.cssText='width:min(520px,100%);background:#111318;border-radius:24px;padding:26px;box-shadow:0 18px 60px rgba(0,0,0,.55);text-align:center;';"+
+      "b.innerHTML='<div style=\"font-size:14px;color:#9fb5cf;margin-bottom:10px\">RÉUNION DIRECT · MODÉRATEUR</div><h2 style=\"font-size:27px;margin:0 0 10px;color:#fff\">Connexion à la réunion</h2><p style=\"font-size:15px;line-height:1.5;color:#cbd5e1;margin:0 0 8px\">Adresse modérateur reconnue :</p><p style=\"font-size:16px;font-weight:700;color:#fff;margin:0 0 20px\">"+MODERATOR_EMAIL+"</p>';"+
+      "var row=document.createElement('div');row.style.cssText='display:flex;gap:12px;flex-direction:column';"+
+      "var start=document.createElement('button');start.textContent='Démarrer comme modérateur';start.style.cssText='border:0;border-radius:12px;padding:14px;background:#1769e0;color:#fff;font-size:16px;font-weight:700;';"+
+      "var cancel=document.createElement('button');cancel.textContent='Annuler';cancel.style.cssText='border:1px solid #4b5563;border-radius:12px;padding:13px;background:transparent;color:#fff;font-size:16px;font-weight:600;';"+
+      "start.onclick=async function(){start.disabled=true;start.textContent='Connexion sécurisée…';try{await loadApi();removeGate();return original.apply(window,args);}catch(e){start.disabled=false;start.textContent='Démarrer comme modérateur';if(window.showError)window.showError('Le service JaaS est momentanément indisponible.');}};"+
+      "cancel.onclick=function(){removeGate();};row.appendChild(start);row.appendChild(cancel);b.appendChild(row);g.appendChild(b);document.body.appendChild(g);}"+
       "if(typeof window.openJitsi==='function'&&!window.__ruunionJitsiWrapped){"+
       "window.__ruunionJitsiWrapped=true;window.__ruunionOriginalOpenJitsi=window.openJitsi;"+
-      "window.openJitsi=async function(){var a=arguments;try{await loadApi();return window.__ruunionOriginalOpenJitsi.apply(window,a);}catch(e){"+
+      "window.openJitsi=async function(){var a=arguments;try{await loadApi();"+
+      "if(a[3]===true){showGate(window.__ruunionOriginalOpenJitsi,a);return;}"+
+      "return window.__ruunionOriginalOpenJitsi.apply(window,a);}catch(e){"+
       "if(window.AndroidBridge&&window.AndroidBridge.openMeetingInBrowser&&a[0]&&a[0].url){window.AndroidBridge.openMeetingInBrowser(a[0].url);}"+
       "if(window.showError)window.showError('Le moteur Jitsi est momentanément indisponible dans l’application. La réunion peut être ouverte dans le navigateur.');}};}"+
       "else{loadApi().catch(function(){});}})();";
